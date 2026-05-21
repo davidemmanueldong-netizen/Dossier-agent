@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flair — Radar de bons plans parfum</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Message file:// -->
+  <div id="file-error" hidden role="alert"></div>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="logo">
+        <span class="logo-icon">✦</span>
+        <span class="logo-text">Flair</span>
+      </div>
+      <p class="tagline">Ton radar de bons plans parfum</p>
+    </div>
+  </header>
+
+  <div class="layout">
+
+    <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+    <aside id="sidebar" aria-label="Liens vendeurs">
+      <h2 class="sidebar-title">Vendeurs</h2>
+      <nav class="vendor-links">
+        <a href="https://www.sephora.fr/parfums/" target="_blank" rel="noopener" class="vendor-link vendor-sephora">Sephora</a>
+        <a href="https://www.nocibe.fr/parfum/" target="_blank" rel="noopener" class="vendor-link vendor-nocibe">Nocibé</a>
+        <a href="https://www.notino.fr/parfums/" target="_blank" rel="noopener" class="vendor-link vendor-notino">Notino</a>
+        <a href="https://www.marionnaud.fr/parfums/" target="_blank" rel="noopener" class="vendor-link vendor-marionnaud">Marionnaud</a>
+      </nav>
+      <p class="sidebar-disclaimer">Vérifiez les prix avant achat. Les offres peuvent changer.</p>
+    </aside>
+
+    <!-- ── Main ────────────────────────────────────────────────────────── -->
+    <main class="main-content">
+
+      <!-- ── Section Hero ──────────────────────────────────────────────── -->
+      <section id="hero" aria-label="Recherche et budget">
+        <div class="hero-content">
+          <h1 class="hero-title">Repérez les meilleures offres</h1>
+          <p class="hero-desc">Suivez les bons plans parfum, comparez les prix et ne ratez plus aucune remise.</p>
+          <div class="hero-controls">
+            <div class="search-group">
+              <label for="deals-search" class="sr-only">Rechercher une offre</label>
+              <input
+                type="search"
+                id="deals-search"
+                class="input-search"
+                placeholder="Rechercher un parfum, marque ou vendeur…"
+                autocomplete="off"
+              >
+            </div>
+            <div class="budget-group">
+              <label for="budget-slider" class="budget-label">
+                Budget max : <span id="budget-value">200€</span>
+              </label>
+              <input
+                type="range"
+                id="budget-slider"
+                class="input-slider"
+                min="0"
+                max="200"
+                value="200"
+                step="5"
+              >
+            </div>
+          </div>
+        </div>
+        <div class="hero-image" aria-hidden="true">
+          <img src="../assets/hero.svg" alt="" role="presentation" class="hero-svg">
+        </div>
+      </section>
+
+      <!-- ── Section Offres ─────────────────────────────────────────────── -->
+      <section id="deals-section" aria-labelledby="deals-heading">
+        <h2 id="deals-heading" class="section-title">Bons plans</h2>
+
+        <!-- Meilleur signal -->
+        <div id="best-deal" class="best-deal-block" hidden aria-live="polite">
+          <div class="best-deal-label">🏆 Meilleur signal</div>
+          <div id="best-deal-content" class="best-deal-content"></div>
+        </div>
+
+        <!-- Filtres -->
+        <div class="filters-bar" role="search" aria-label="Filtres des offres">
+          <div class="filter-group">
+            <label for="filter-profile" class="filter-label">Profil</label>
+            <select id="filter-profile" class="filter-select">
+              <option value="all">Tous</option>
+              <option value="femme">Femme</option>
+              <option value="homme">Homme</option>
+              <option value="mixte">Mixte</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-family" class="filter-label">Famille</label>
+            <select id="filter-family" class="filter-select">
+              <option value="all">Toutes</option>
+              <option value="floral">Floral</option>
+              <option value="ambre">Ambre</option>
+              <option value="boisé">Boisé</option>
+              <option value="frais">Frais</option>
+              <option value="gourmand">Gourmand</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label for="filter-type" class="filter-label">Type</label>
+            <select id="filter-type" class="filter-select">
+              <option value="all">Tous</option>
+              <option value="EDP">EDP</option>
+              <option value="EDT">EDT</option>
+              <option value="brume/coffret">Brume / Coffret</option>
+            </select>
+          </div>
+          <div class="filter-group filter-toggle">
+            <input type="checkbox" id="filter-discount" class="input-checkbox">
+            <label for="filter-discount" class="filter-label-toggle">Remise connue uniquement</label>
+          </div>
+        </div>
+
+        <!-- Tris -->
+        <div class="sort-bar" role="group" aria-label="Tri des offres">
+          <span class="sort-label">Trier par :</span>
+          <label class="sort-option">
+            <input type="radio" name="sort" value="score" checked> Score
+          </label>
+          <label class="sort-option">
+            <input type="radio" name="sort" value="discount"> Remise
+          </label>
+          <label class="sort-option">
+            <input type="radio" name="sort" value="pricePerMl"> Prix/ml
+          </label>
+        </div>
+
+        <!-- Grille des offres -->
+        <div id="deals-grid" class="deals-grid" aria-live="polite" aria-label="Offres parfum">
+          <!-- Cartes injectées par app.js -->
+        </div>
+
+        <div class="deals-actions">
+          <button id="btn-add-deal" class="btn-primary" type="button">+ Ajouter une offre</button>
+        </div>
+      </section>
+
+      <!-- ── Section Fragella ───────────────────────────────────────────── -->
+      <section id="fragella-section" aria-labelledby="fragella-heading">
+        <h2 id="fragella-heading" class="section-title">Fiches parfum Fragella</h2>
+        <p class="fragella-hint">
+          💡 Essaie : "Libre Yves Saint Laurent", "Sauvage Dior", "Alien Mugler"
+        </p>
+        <div class="fragella-search-bar">
+          <label for="fragella-input" class="sr-only">Rechercher un parfum sur Fragella</label>
+          <input
+            type="search"
+            id="fragella-input"
+            class="input-search"
+            placeholder="Ex : Libre, Sauvage, Alien…"
+            autocomplete="off"
+          >
+          <button id="btn-fragella-search" class="btn-primary" type="button">Enrichir</button>
+        </div>
+        <div id="fragella-status" class="fragella-status" aria-live="polite" hidden></div>
+
+        <div class="fragella-layout">
+          <div id="fragella-grid" class="fragella-grid" aria-live="polite"></div>
+
+          <aside id="fragella-detail" class="fragella-detail" hidden aria-label="Détail parfum">
+            <button id="btn-fragella-back" class="btn-back" type="button">← Retour à la recherche</button>
+            <div id="fragella-detail-content" class="fragella-detail-content"></div>
+          </aside>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ── Modale ajout offre ─────────────────────────────────────────────── -->
+  <div id="modal-add" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title" hidden>
+    <div class="modal-box">
+      <h2 id="modal-title" class="modal-title">Ajouter une offre</h2>
+      <form id="form-add-deal" novalidate>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-perfume-name">Nom du parfum <span aria-hidden="true">*</span></label>
+            <input type="text" id="modal-perfume-name" name="name" required placeholder="Ex : Libre EDP">
+          </div>
+          <div class="form-group">
+            <label for="modal-brand">Marque <span aria-hidden="true">*</span></label>
+            <input type="text" id="modal-brand" name="brand" required placeholder="Ex : Yves Saint Laurent">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-vendor">Vendeur <span aria-hidden="true">*</span></label>
+            <input type="text" id="modal-vendor" name="vendor" required placeholder="Ex : Sephora">
+          </div>
+          <div class="form-group">
+            <label for="modal-price">Prix (€) <span aria-hidden="true">*</span></label>
+            <input type="number" id="modal-price" name="price" required min="1" step="0.01" placeholder="Ex : 79.99">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-ref-price">Prix de référence (€)</label>
+            <input type="number" id="modal-ref-price" name="refPrice" min="1" step="0.01" placeholder="Ex : 100.00">
+          </div>
+          <div class="form-group">
+            <label for="modal-volume">Volume (ml) <span aria-hidden="true">*</span></label>
+            <input type="number" id="modal-volume" name="volume" required min="1" placeholder="Ex : 50">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="modal-profile">Profil <span aria-hidden="true">*</span></label>
+            <select id="modal-profile" name="profile" required>
+              <option value="">Choisir…</option>
+              <option value="femme">Femme</option>
+              <option value="homme">Homme</option>
+              <option value="mixte">Mixte</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modal-family">Famille <span aria-hidden="true">*</span></label>
+            <select id="modal-family" name="family" required>
+              <option value="">Choisir…</option>
+              <option value="floral">Floral</option>
+              <option value="ambre">Ambre</option>
+              <option value="boisé">Boisé</option>
+              <option value="frais">Frais</option>
+              <option value="gourmand">Gourmand</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="modal-type">Type <span aria-hidden="true">*</span></label>
+            <select id="modal-type" name="type" required>
+              <option value="">Choisir…</option>
+              <option value="EDP">EDP</option>
+              <option value="EDT">EDT</option>
+              <option value="brume/coffret">Brume / Coffret</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group form-group-full">
+            <label for="modal-url">Lien vers l'offre</label>
+            <input type="url" id="modal-url" name="offerUrl" placeholder="https://…">
+          </div>
+        </div>
+
+        <div id="form-error" class="form-error" role="alert" hidden></div>
+
+        <div class="modal-actions">
+          <button type="button" id="btn-modal-cancel" class="btn-secondary">Annuler</button>
+          <button type="submit" class="btn-primary">Enregistrer</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
