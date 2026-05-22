@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planificateur IA — LifeSync</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <span class="logo-icon">⟳</span>
+        <span class="logo-text">LifeSync</span>
+      </div>
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active">
+          <span>💬</span> Planificateur IA
+        </a>
+        <a href="#" class="nav-item">
+          <span>📅</span> Calendrier
+        </a>
+        <a href="#" class="nav-item">
+          <span>🌸</span> Cycle
+        </a>
+        <a href="#" class="nav-item">
+          <span>⚕️</span> Santé
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">W</div>
+          <div class="user-name">Wellyane</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chat principal -->
+    <main class="chat-area">
+      <header class="chat-header">
+        <h1>Planificateur IA</h1>
+        <p class="chat-subtitle">Décrivez votre besoin en langage naturel</p>
+      </header>
+
+      <div class="messages" id="messages">
+        <!-- Message d'accueil -->
+        <div class="message ai-message">
+          <div class="message-avatar ai-avatar">AI</div>
+          <div class="message-bubble">
+            <p>Bonjour ! Je suis votre assistant LifeSync. Je prends en compte votre calendrier, votre cycle et vos RDV médicaux pour suggérer les meilleurs créneaux.</p>
+            <p>Que souhaitez-vous planifier ?</p>
+            <div class="quick-actions" id="quick-actions">
+              <button class="quick-btn" data-text="Je dois prendre rendez-vous chez le dentiste, quand as-tu un créneau disponible ?">🦷 Dentiste</button>
+              <button class="quick-btn" data-text="Je veux planifier des vacances, quelles périodes sont libres dans les deux calendriers ?">✈️ Vacances</button>
+              <button class="quick-btn" data-text="J'ai une réunion importante à organiser avec David, quand sommes-nous tous les deux disponibles ?">📋 Réunion</button>
+              <button class="quick-btn" data-text="Je voudrais planifier un bilan de santé, quel serait le meilleur moment compte tenu de mon cycle ?">📋 Bilan santé</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-area">
+        <div class="input-wrapper">
+          <textarea
+            id="user-input"
+            class="chat-input"
+            placeholder="Ex: Prendre RDV gynéco avant mes vacances..."
+            rows="1"
+          ></textarea>
+          <button id="send-btn" class="send-btn" title="Envoyer">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>
