@@ -102,7 +102,7 @@ function formatEvents(events) {
   return events.map(ev => {
     const d = ev.start.toLocaleDateString('fr-FR', {
       weekday: 'short', day: 'numeric', month: 'short',
-      hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Paris'
+      hour: '2-digit', minute: '2-digit'
     });
     const loc = ev.location ? ` — ${ev.location}` : '';
     return `  • ${d}${loc} : ${ev.summary}`;
@@ -114,8 +114,7 @@ function buildSystemPrompt() {
   const wellyane = loadCalendar('wellyane.ics', 'Wellyane');
   const david    = loadCalendar('david.ics', 'David');
   const today    = new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
-    timeZone: 'Europe/Paris'
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
 
   return `Tu es LifeSync, assistant de planification personnel de Wellyane et David.
