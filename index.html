@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rythme — Agent IA Autonome de Vie Quotidienne</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ========================================================
+     HEADER
+======================================================== -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo-block">
+      <div class="logo-icon">R</div>
+      <div class="logo-text">
+        <span class="logo-name">Rythme</span>
+        <span class="logo-tagline">Agent IA Autonome</span>
+      </div>
+    </div>
+    <div class="header-badges">
+      <span class="badge badge-active">
+        <span class="pulse-dot"></span>
+        Agent autonome activé
+      </span>
+      <span class="badge badge-sim">
+        🎓 Simulation académique
+      </span>
+    </div>
+  </div>
+</header>
+
+<!-- ========================================================
+     DISCLAIMER
+======================================================== -->
+<div class="disclaimer">
+  <span>⚠ Simulation académique — aucune action réelle n'est exécutée. Toutes les données sont fictives.</span>
+</div>
+
+<!-- ========================================================
+     LAYOUT PRINCIPAL
+======================================================== -->
+<main class="main-layout">
+
+  <!-- COLONNE CENTRALE -->
+  <div class="col-center">
+
+    <!-- HERO INPUT -->
+    <section class="hero-section">
+      <div class="hero-greeting">
+        <div class="avatar">L</div>
+        <div>
+          <h1 class="hero-title">Bonjour Lola,<br>comment tu te sens aujourd'hui ?</h1>
+          <p class="hero-sub">Je suis ton agent IA personnel. Dis-moi ce dont tu as besoin — je m'occupe du reste.</p>
+        </div>
+      </div>
+
+      <div class="input-block">
+        <textarea
+          id="requete-input"
+          class="requete-input"
+          rows="3"
+          placeholder="Ex : Je me sens mal depuis quelques jours, j'ai besoin d'aide…"></textarea>
+        <button id="btn-organiser" class="btn-primary">
+          <span class="btn-icon">✦</span>
+          Organiser
+        </button>
+      </div>
+
+      <!-- Chips de suggestion (ne montrent pas de requêtes prédéfinies, juste des thèmes) -->
+      <div class="chips-row">
+        <span class="chip" data-query="Je me sens mal depuis quelques jours">🌡 Santé</span>
+        <span class="chip" data-query="Je suis fatiguée mais je n'ai pas beaucoup d'argent">💸 Fatigue & budget</span>
+        <span class="chip" data-query="Prends-moi un rendez-vous gynéco">🩺 Gynéco</span>
+        <span class="chip" data-query="Je suis stressée depuis longtemps">🌊 Stress chronique</span>
+        <span class="chip" data-query="J'ai besoin d'un massage">💆 Massage</span>
+        <span class="chip" data-query="Organise ma semaine sans me surcharger">📅 Planning semaine</span>
+        <span class="chip" data-query="J'ai trop de choses à faire et je suis épuisée">😰 Épuisement</span>
+      </div>
+    </section>
+
+    <!-- LOADING OVERLAY -->
+    <div id="loading-overlay" class="loading-overlay">
+      <div class="loading-card">
+        <div class="loading-spinner"></div>
+        <p class="loading-title">Agent Rythme en action…</p>
+        <p class="loading-sub">Analyse · Scoring · Décision · Exécution SQL</p>
+      </div>
+    </div>
+
+    <!-- ====================================================
+         SECTION RÉSULTAT — CARTE DÉCISION
+    ==================================================== -->
+    <section id="section-result" class="result-section hidden">
+
+      <!-- Carte principale décision -->
+      <div class="card card-decision reveal-card">
+        <div class="card-header-row">
+          <div class="card-label">Décision finale de l'agent</div>
+          <div class="decision-score-badge">
+            Score <span id="decision-score" class="score-num">—</span>
+          </div>
+        </div>
+        <div id="decision-intention" class="intention-tag">—</div>
+        <h2 id="decision-titre" class="decision-titre">—</h2>
+
+        <div class="decision-meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">📅 Date</span>
+            <span id="decision-date" class="meta-val">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">🕐 Heure</span>
+            <span id="decision-heure" class="meta-val">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">📍 Lieu</span>
+            <span id="decision-lieu" class="meta-val">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">💶 Coût</span>
+            <span id="decision-cout" class="meta-val">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">💰 Budget restant</span>
+            <span id="decision-budget-apres" class="meta-val">—</span>
+          </div>
+          <div class="meta-item">
+            <span class="meta-label">État budget</span>
+            <span id="decision-budget-tag" class="budget-tag">—</span>
+          </div>
+        </div>
+
+        <div class="export-row">
+          <button id="btn-export-ics" class="btn-export">📥 Exporter en .ics</button>
+          <button id="btn-export-csv" class="btn-export">📊 Exporter CSV décisions</button>
+        </div>
+      </div>
+
+      <!-- Pourquoi cette décision -->
+      <div class="card card-why reveal-card">
+        <div class="card-header-row">
+          <h3 class="card-title">Pourquoi cette décision ?</h3>
+        </div>
+        <p id="pourquoi-text" class="pourquoi-text">—</p>
+
+        <!-- Signaux extraits -->
+        <div class="signaux-block">
+          <div class="signaux-title">Signaux détectés</div>
+          <div id="signaux-list" class="signaux-list"></div>
+        </div>
+
+        <!-- Barres de contexte -->
+        <div class="contexte-bars">
+          <div class="bar-row">
+            <span class="bar-label">Fatigue</span>
+            <div class="bar-track"><div id="contexte-fatigue" class="bar-fill bar-fatigue"></div></div>
+            <span id="val-fatigue" class="bar-val">—</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Stress</span>
+            <div class="bar-track"><div id="contexte-stress" class="bar-fill bar-stress"></div></div>
+            <span id="val-stress" class="bar-val">—</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Budget</span>
+            <div class="bar-track"><div id="contexte-budget" class="bar-fill bar-budget"></div></div>
+            <span id="val-budget" class="bar-val">—</span>
+          </div>
+          <div class="bar-row">
+            <span class="bar-label">Agenda</span>
+            <div class="bar-track"><div id="contexte-agenda" class="bar-fill bar-agenda"></div></div>
+            <span id="val-agenda" class="bar-val">—</span>
+          </div>
+        </div>
+
+        <!-- Sources consultées -->
+        <div class="sources-block">
+          <div class="sources-title">Sources consultées par l'agent</div>
+          <ul id="sources-list" class="sources-list"></ul>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ====================================================
+         SECTION OPTIONS COMPARÉES
+    ==================================================== -->
+    <section id="section-options" class="options-section hidden">
+      <div class="card card-options reveal-card">
+        <div class="card-header-row">
+          <h3 class="card-title">Options comparées</h3>
+          <span class="formula-toggle" onclick="document.getElementById('formula-box').classList.toggle('hidden')">⚙ Formule de scoring</span>
+        </div>
+
+        <div id="formula-box" class="formula-box hidden">
+          <div class="formula-title">Formule de score final</div>
+          <pre class="formula-code">score_final =
+  urgence_santé   × 3
++ pertinence      × 3
++ impact_bien_être × 2
++ compat_agenda   × 2
++ compat_budget   × 2
+- coût_normalisé  × 2
+- charge_mentale  × 1
+- fatigue_demandée × 1</pre>
+        </div>
+
+        <div class="table-wrap">
+          <table class="options-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Option</th>
+                <th>Coût</th>
+                <th>Score</th>
+                <th>Budget OK</th>
+              </tr>
+            </thead>
+            <tbody id="options-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SECTION PLAN D'ACTION
+    ==================================================== -->
+    <section id="section-plan" class="plan-section hidden">
+      <div class="card card-plan reveal-card">
+        <h3 class="card-title">Plan d'action — Actions exécutées</h3>
+        <div id="plan-rdv"></div>
+        <div id="plan-repos"></div>
+        <div id="plan-tache"></div>
+        <div id="plan-gratuit"></div>
+        <div id="plan-budget"></div>
+      </div>
+    </section>
+
+    <!-- ====================================================
+         SECTION SEMAINE
+    ==================================================== -->
+    <section id="section-semaine" class="semaine-section hidden">
+      <div class="card card-semaine reveal-card">
+        <h3 class="card-title">Simulation de semaine équilibrée</h3>
+        <p class="semaine-intro">Rythme a planifié une semaine qui préserve ton énergie, ton budget et ta santé.</p>
+        <div id="semaine-grid" class="semaine-grid"></div>
+      </div>
+    </section>
+
+  </div><!-- /col-center -->
+
+  <!-- ====================================================
+       PANNEAU LATÉRAL DROIT
+  ==================================================== -->
+  <aside class="col-aside">
+
+    <!-- Profil utilisateur -->
+    <div class="card card-profil">
+      <div class="profil-header">
+        <div class="profil-avatar">L</div>
+        <div>
+          <div class="profil-nom">Lola Martin</div>
+          <div class="profil-statut">Profil actif</div>
+        </div>
+      </div>
+      <div class="profil-stats">
+        <div class="stat-item"><span class="stat-label">Revenu</span><span class="stat-val">1 500 €/mois</span></div>
+        <div class="stat-item"><span class="stat-label">Loyer</span><span class="stat-val">900 €</span></div>
+        <div class="stat-item"><span class="stat-label">Charges fixes</span><span class="stat-val">350 €</span></div>
+        <div class="stat-item highlight"><span class="stat-label">Budget restant</span><span class="stat-val">250 €</span></div>
+        <div class="stat-item highlight-green"><span class="stat-label">Budget bien-être</span><span class="stat-val">40 €</span></div>
+      </div>
+    </div>
+
+    <!-- Console agent -->
+    <div class="card card-console">
+      <div class="console-header">
+        <span class="console-dot dot-red"></span>
+        <span class="console-dot dot-yellow"></span>
+        <span class="console-dot dot-green"></span>
+        <span class="console-title">Console agent</span>
+      </div>
+      <div id="console-log" class="console-log">
+        <div class="log-entry log-init">
+          <span class="log-badge">INIT</span>
+          <span class="log-text">En attente d'une requête…</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panneau SQL Live -->
+    <div class="card card-sql">
+      <div class="console-header">
+        <span class="console-dot dot-red"></span>
+        <span class="console-dot dot-yellow"></span>
+        <span class="console-dot dot-green"></span>
+        <span class="console-title">SQL Live</span>
+        <span class="sql-live-badge">LIVE</span>
+      </div>
+      <div id="sql-panel" class="sql-panel">
+        <div class="sql-placeholder">Les requêtes SQL générées par l'agent apparaîtront ici…</div>
+      </div>
+    </div>
+
+  </aside>
+
+</main>
+
+<!-- ========================================================
+     FOOTER
+======================================================== -->
+<footer class="footer">
+  <div class="footer-inner">
+    <span class="footer-logo">Rythme</span>
+    <span class="footer-sep">·</span>
+    <span>Démonstration agent IA autonome</span>
+    <span class="footer-sep">·</span>
+    <span>Simulation académique — aucune donnée réelle</span>
+  </div>
+</footer>
+
+<script src="data.js"></script>
+<script src="sql.js"></script>
+<script src="agent.js"></script>
+<script src="ui.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", () => UI.init());
+</script>
+</body>
+</html>
