@@ -157,19 +157,34 @@
         </button>
       </header>
 
-      <div class="messages" id="messages">
-        <div class="message ai-message">
-          <div class="message-avatar ai-avatar">AI</div>
-          <div class="message-bubble">
-            <p>Bonjour ! Quel RDV je vous trouve ?</p>
-            <div class="quick-actions" id="quick-actions">
-              <button class="quick-btn" data-text="Prends-moi un RDV gynéco dès que possible.">🩺 Gynéco</button>
-              <button class="quick-btn" data-text="Je veux un RDV chez le dentiste, quand suis-je libre ?">🦷 Dentiste</button>
-              <button class="quick-btn" data-text="Quand sommes-nous tous les deux disponibles pour nous voir ?">📋 Créneau commun</button>
-              <button class="quick-btn" data-text="Je suis fatiguée, propose-moi un week-end de repos.">😴 Repos</button>
+      <div class="chat-body">
+
+        <div class="messages" id="messages">
+          <div class="message ai-message">
+            <div class="message-avatar ai-avatar">AI</div>
+            <div class="message-bubble">
+              <p>Bonjour ! Quel RDV je vous trouve ?</p>
+              <div class="quick-actions" id="quick-actions">
+                <button class="quick-btn" data-text="Prends-moi un RDV gynéco dès que possible.">🩺 Gynéco</button>
+                <button class="quick-btn" data-text="Je veux un RDV chez le dentiste, quand suis-je libre ?">🦷 Dentiste</button>
+                <button class="quick-btn" data-text="Quand sommes-nous tous les deux disponibles pour nous voir ?">📋 Créneau commun</button>
+                <button class="quick-btn" data-text="Je suis fatiguée, propose-moi un week-end de repos.">😴 Repos</button>
+              </div>
             </div>
           </div>
         </div>
+
+        <!-- Console de log -->
+        <aside class="log-panel">
+          <div class="log-header">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            Console
+          </div>
+          <div class="log-entries" id="log-entries">
+            <div class="log-empty">Les applications utilisées s'afficheront ici après chaque message.</div>
+          </div>
+        </aside>
+
       </div>
 
       <div class="chat-input-area">

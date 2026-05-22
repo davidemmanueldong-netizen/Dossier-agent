@@ -169,6 +169,7 @@ async function sendMessage(text) {
     } else {
       addMessage('ai', data.message);
       history.push({ role: 'assistant', content: data.message });
+      if (data.sources) addLogEntry(data.sources);
     }
   } catch (err) {
     hideTyping();
@@ -177,6 +178,33 @@ async function sendMessage(text) {
 
   sendBtn.disabled = false;
   inputEl.focus();
+}
+
+// ── Console de log ───────────────────────────────────────────────────────
+const logEntriesEl = document.getElementById('log-entries');
+const ICON_MAP = { gcal: 'log-icon-gcal', flo: 'log-icon-flo', claude: 'log-icon-claude' };
+const EMOJI_MAP = { gcal: '📅', flo: '🌸', claude: '🤖' };
+
+function addLogEntry(sources) {
+  const empty = logEntriesEl.querySelector('.log-empty');
+  if (empty) empty.remove();
+
+  const now  = new Date();
+  const time = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+  const entry = document.createElement('div');
+  entry.className = 'log-entry';
+  entry.innerHTML = `<div class="log-entry-time">${time}</div>` +
+    sources.map(s => `
+      <div class="log-item">
+        <div class="log-item-icon ${ICON_MAP[s.icon] || ''}">${EMOJI_MAP[s.icon] || '•'}</div>
+        <div>
+          <div class="log-item-name">${esc(s.name)}</div>
+          <div class="log-item-detail">${esc(s.detail)}</div>
+        </div>
+      </div>`).join('');
+
+  logEntriesEl.prepend(entry);
 }
 
 sendBtn.addEventListener('click', () => sendMessage(inputEl.value));

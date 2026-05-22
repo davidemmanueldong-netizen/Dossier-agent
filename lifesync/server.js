@@ -166,8 +166,9 @@ function callClaude(messages) {
         try {
           const parsed = JSON.parse(data);
           if (parsed.error) return reject(new Error(parsed.error.message || 'Erreur Claude'));
-          const text = parsed.content?.[0]?.text || '';
-          resolve(text);
+          const text  = parsed.content?.[0]?.text || '';
+          const usage = parsed.usage || {};
+          resolve({ text, usage });
         } catch (e) {
           reject(new Error('Réponse invalide de Claude'));
         }
@@ -224,9 +225,17 @@ const server = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ error: 'bad_request', message: 'messages requis' }));
         return;
       }
-      const reply = await callClaude(messages);
+      const wellyane = loadCalendar('wellyane.ics', 'Wellyane');
+      const david    = loadCalendar('david.ics', 'David');
+      const { text: reply, usage } = await callClaude(messages);
+      const sources = [
+        { icon: 'gcal',   name: 'Google Calendar', detail: `Wellyane — ${wellyane.length} événements` },
+        { icon: 'gcal',   name: 'Google Calendar', detail: `David — ${david.length} événements` },
+        { icon: 'flo',    name: 'Flo',             detail: 'Suivi de cycle actif' },
+        { icon: 'claude', name: 'Claude AI',        detail: `${CLAUDE_MODEL} · ${usage.input_tokens || '?'} → ${usage.output_tokens || '?'} tokens` },
+      ];
       res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ message: reply }));
+      res.end(JSON.stringify({ message: reply, sources }));
     } catch (err) {
       console.error('[LIFESYNC] Erreur Claude:', err.message);
       res.writeHead(500, { 'Content-Type': 'application/json' });
