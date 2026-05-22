@@ -230,7 +230,8 @@ ul { list-style: none; }
 
 /* ── Messages ──────────────────────────────────────────────────────────── */
 .messages {
-  flex: 1; min-width: 0; overflow-y: auto;
+  overflow-y: auto;
+  min-height: 0;
   padding: 1.25rem 1.5rem;
   display: flex; flex-direction: column; gap: 1.1rem;
   scroll-behavior: smooth;
@@ -280,17 +281,41 @@ ul { list-style: none; }
 }
 .doctolib-link:hover { background: rgba(0,180,216,0.22); color: #a5e8f5; }
 
+/* ── Chat view layout (grid) ───────────────────────────────────────────── */
+#view-chat {
+  display: grid !important;
+  grid-template-rows: auto 1fr auto;
+  grid-template-columns: 1fr 260px;
+  height: 100vh;
+  overflow: hidden;
+}
+#view-chat .chat-header {
+  grid-column: 1 / -1;
+  grid-row: 1;
+}
+#view-chat .chat-body {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  display: grid;
+  grid-template-columns: 1fr 260px;
+  overflow: hidden;
+  min-height: 0;
+}
+#view-chat .chat-input-area {
+  grid-column: 1 / -1;
+  grid-row: 3;
+}
+
 /* ── Chat body (messages + log panel) ─────────────────────────────────── */
 .chat-body {
-  display: flex;
-  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 260px;
   overflow: hidden;
+  min-height: 0;
 }
 
 /* ── Log panel ─────────────────────────────────────────────────────────── */
 .log-panel {
-  width: 260px;
-  flex-shrink: 0;
   border-left: 2px solid rgba(124,106,248,0.4);
   display: flex;
   flex-direction: column;
