@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LifeSync — Présentation</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; background: #000; }
+
+  /* ── Slideshow ── */
+  .deck { width: 100vw; height: 100vh; position: relative; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 3rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.4s ease;
+  }
+  .slide.active { opacity: 1; pointer-events: all; }
+
+  /* ── Navigation ── */
+  .nav {
+    position: fixed; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 1rem; z-index: 100;
+  }
+  .nav-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+    color: white; font-size: 1.1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background 0.2s;
+  }
+  .nav-btn:hover { background: rgba(255,255,255,0.2); }
+  .nav-dots { display: flex; gap: 0.45rem; }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(255,255,255,0.3); cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .dot.active { background: white; transform: scale(1.3); }
+
+  /* ── Numéro slide ── */
+  .slide-num {
+    position: fixed; top: 1.5rem; right: 2rem;
+    font-size: 0.8rem; color: rgba(255,255,255,0.35);
+    font-weight: 600; letter-spacing: 0.05em;
+  }
+
+  /* ══════════════════════════════════════
+     SLIDE 1 — Titre
+  ══════════════════════════════════════ */
+  #s1 {
+    background: linear-gradient(135deg, #0d0d2e 0%, #1a0a3e 50%, #0d1a3e 100%);
+  }
+  .s1-logo {
+    width: 70px; height: 70px; border-radius: 18px; margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #7c6af8, #c084fc);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 0 60px rgba(124,106,248,0.5);
+  }
+  .s1-title {
+    font-size: 4.5rem; font-weight: 900; color: white;
+    text-align: center; line-height: 1.05;
+    background: linear-gradient(90deg, #a78bfa, #c084fc, #818cf8);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    margin-bottom: 1rem;
+  }
+  .s1-sub {
+    font-size: 1.35rem; color: rgba(255,255,255,0.55);
+    text-align: center; max-width: 520px; line-height: 1.5;
+    font-weight: 400;
+  }
+  .s1-tags {
+    display: flex; gap: 0.75rem; margin-top: 2.5rem; flex-wrap: wrap; justify-content: center;
+  }
+  .s1-tag {
+    padding: 0.4rem 1rem; border-radius: 20px;
+    background: rgba(124,106,248,0.15); border: 1px solid rgba(124,106,248,0.35);
+    color: #a78bfa; font-size: 0.9rem; font-weight: 600;
+  }
+
+  /* ══════════════════════════════════════
+     SLIDE 2 — Le problème
+  ══════════════════════════════════════ */
+  #s2 { background: linear-gradient(135deg, #0a0a1e, #1a0e2e); }
+
+  .s2-label {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #f472b6; margin-bottom: 1.25rem;
+  }
+  .s2-title {
+    font-size: 2.8rem; font-weight: 900; color: white;
+    text-align: center; margin-bottom: 3rem; line-height: 1.15;
+  }
+  .s2-grid {
+    display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap;
+  }
+  .s2-card {
+    width: 200px; padding: 1.5rem 1.25rem; border-radius: 16px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .s2-card:hover { transform: translateY(-4px); }
+  .s2-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .s2-app  { font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.35rem; }
+  .s2-desc { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.4; }
+  .s2-arrow {
+    font-size: 2rem; color: rgba(255,255,255,0.2);
+    display: flex; align-items: center;
+  }
+  .s2-problem {
+    margin-top: 2.5rem; padding: 1rem 2rem; border-radius: 12px;
+    background: rgba(248,113,113,0.1); border: 1px solid rgba(248,113,113,0.25);
+    color: #fca5a5; font-size: 1rem; font-weight: 600; text-align: center;
+  }
+
+  /* ══════════════════════════════════════
+     SLIDE 3 — La solution
+  ══════════════════════════════════════ */
+  #s3 { background: linear-gradient(135deg, #071a0e, #0a1a2e); }
+
+  .s3-label {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #34d399; margin-bottom: 1.25rem;
+  }
+  .s3-title {
+    font-size: 2.8rem; font-weight: 900; color: white;
+    text-align: center; margin-bottom: 3rem;
+  }
+  .s3-flow {
+    display: flex; align-items: center; gap: 1.25rem;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .s3-box {
+    padding: 1.25rem 1.5rem; border-radius: 14px; text-align: center; min-width: 140px;
+  }
+  .s3-box.user {
+    background: rgba(124,106,248,0.15); border: 2px solid rgba(124,106,248,0.4);
+  }
+  .s3-box.ai {
+    background: linear-gradient(135deg, rgba(124,106,248,0.25), rgba(192,132,252,0.25));
+    border: 2px solid rgba(167,139,250,0.5);
+    box-shadow: 0 0 30px rgba(124,106,248,0.3);
+  }
+  .s3-box.app {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.12);
+  }
+  .s3-box-icon { font-size: 1.8rem; margin-bottom: 0.4rem; }
+  .s3-box-name { font-size: 0.9rem; font-weight: 700; color: white; }
+  .s3-box-sub  { font-size: 0.75rem; color: rgba(255,255,255,0.45); margin-top: 0.2rem; }
+  .s3-chevron  { font-size: 1.5rem; color: rgba(255,255,255,0.3); }
+  .s3-apps { display: flex; flex-direction: column; gap: 0.5rem; }
+
+  .s3-quote {
+    margin-top: 2.5rem; padding: 1rem 2rem; border-radius: 12px;
+    background: rgba(52,211,153,0.08); border: 1px solid rgba(52,211,153,0.2);
+    color: #6ee7b7; font-size: 1.05rem; font-weight: 600; text-align: center;
+    font-style: italic;
+  }
+
+  /* ══════════════════════════════════════
+     SLIDE 4 — Ce que ça fait
+  ══════════════════════════════════════ */
+  #s4 { background: linear-gradient(135deg, #0d0d2e, #0a1a2e); }
+
+  .s4-label {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #60a5fa; margin-bottom: 1.25rem;
+  }
+  .s4-title {
+    font-size: 2.8rem; font-weight: 900; color: white;
+    text-align: center; margin-bottom: 2.5rem;
+  }
+  .s4-examples { display: flex; flex-direction: column; gap: 1rem; max-width: 700px; width: 100%; }
+  .s4-ex {
+    display: flex; gap: 1rem; align-items: flex-start;
+    padding: 1rem 1.25rem; border-radius: 14px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+  }
+  .s4-q {
+    flex: 1; font-size: 0.92rem; color: rgba(255,255,255,0.7);
+    border-right: 1px solid rgba(255,255,255,0.08); padding-right: 1rem;
+    font-style: italic;
+  }
+  .s4-q::before { content: '💬 '; }
+  .s4-r {
+    flex: 1; font-size: 0.92rem; color: #a78bfa; font-weight: 600; padding-left: 0.25rem;
+  }
+
+  /* ══════════════════════════════════════
+     SLIDE 5 — La tech
+  ══════════════════════════════════════ */
+  #s5 { background: linear-gradient(135deg, #0a0a1e, #1a0a1e); }
+
+  .s5-label {
+    font-size: 0.8rem; font-weight: 700; letter-spacing: 0.12em;
+    text-transform: uppercase; color: #f9a8d4; margin-bottom: 1.25rem;
+  }
+  .s5-title {
+    font-size: 2.8rem; font-weight: 900; color: white;
+    text-align: center; margin-bottom: 2.5rem;
+  }
+  .s5-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; max-width: 640px; width: 100%; }
+  .s5-card {
+    padding: 1.25rem; border-radius: 14px;
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  }
+  .s5-card-icon { font-size: 1.6rem; margin-bottom: 0.5rem; }
+  .s5-card-name { font-size: 1rem; font-weight: 700; color: white; margin-bottom: 0.3rem; }
+  .s5-card-desc { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.5; }
+  .s5-built {
+    margin-top: 2rem; padding: 0.85rem 1.75rem; border-radius: 30px;
+    background: linear-gradient(90deg, rgba(124,106,248,0.2), rgba(192,132,252,0.2));
+    border: 1px solid rgba(167,139,250,0.35);
+    color: #c084fc; font-size: 0.9rem; font-weight: 700; text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="slide-num" id="slide-num">1 / 5</div>
+
+<div class="deck">
+
+  <!-- ── Slide 1 : Titre ── -->
+  <div class="slide active" id="s1">
+    <div class="s1-logo">⟳</div>
+    <div class="s1-title">LifeSync</div>
+    <div class="s1-sub">L'assistant IA qui connecte ton agenda, ton cycle et tes rendez-vous médicaux</div>
+    <div class="s1-tags">
+      <span class="s1-tag">📅 Google Calendar</span>
+      <span class="s1-tag">🌸 Flo</span>
+      <span class="s1-tag">🏥 Doctolib</span>
+    </div>
+  </div>
+
+  <!-- ── Slide 2 : Problème ── -->
+  <div class="slide" id="s2">
+    <div class="s2-label">Le problème</div>
+    <div class="s2-title">On jongle entre<br>trop d'applications</div>
+    <div class="s2-grid">
+      <div class="s2-card">
+        <div class="s2-icon">📅</div>
+        <div class="s2-app">Google Calendar</div>
+        <div class="s2-desc">Tes événements et RDV</div>
+      </div>
+      <div class="s2-arrow">→</div>
+      <div class="s2-card">
+        <div class="s2-icon">🌸</div>
+        <div class="s2-app">Flo</div>
+        <div class="s2-desc">Ton cycle menstruel</div>
+      </div>
+      <div class="s2-arrow">→</div>
+      <div class="s2-card">
+        <div class="s2-icon">🏥</div>
+        <div class="s2-app">Doctolib</div>
+        <div class="s2-desc">Tes RDV médicaux</div>
+      </div>
+    </div>
+    <div class="s2-problem">❌ Aucune de ces apps ne se parle — tu dois tout faire toi-même</div>
+  </div>
+
+  <!-- ── Slide 3 : Solution ── -->
+  <div class="slide" id="s3">
+    <div class="s3-label">La solution</div>
+    <div class="s3-title">LifeSync connecte tout</div>
+    <div class="s3-flow">
+      <div class="s3-box user">
+        <div class="s3-box-icon">🙋</div>
+        <div class="s3-box-name">Toi</div>
+        <div class="s3-box-sub">Tu parles en français</div>
+      </div>
+      <div class="s3-chevron">→</div>
+      <div class="s3-box ai">
+        <div class="s3-box-icon">🤖</div>
+        <div class="s3-box-name">LifeSync IA</div>
+        <div class="s3-box-sub">Claude (Anthropic)</div>
+      </div>
+      <div class="s3-chevron">→</div>
+      <div class="s3-apps">
+        <div class="s3-box app"><div class="s3-box-icon">📅</div><div class="s3-box-name">Google Calendar</div></div>
+        <div class="s3-box app"><div class="s3-box-icon">🌸</div><div class="s3-box-name">Flo</div></div>
+        <div class="s3-box app"><div class="s3-box-icon">🏥</div><div class="s3-box-name">Doctolib</div></div>
+      </div>
+    </div>
+    <div class="s3-quote">"Tu parles, il gère — plus besoin de chercher dans 3 apps"</div>
+  </div>
+
+  <!-- ── Slide 4 : Ce que ça fait ── -->
+  <div class="slide" id="s4">
+    <div class="s4-label">En pratique</div>
+    <div class="s4-title">Ce que tu dis → ce qu'il fait</div>
+    <div class="s4-examples">
+      <div class="s4-ex">
+        <div class="s4-q">Prends-moi un RDV gynéco dès que possible</div>
+        <div class="s4-r">🩺 Trouve le créneau libre + lien Doctolib direct</div>
+      </div>
+      <div class="s4-ex">
+        <div class="s4-q">Quand sommes-nous libres tous les deux ?</div>
+        <div class="s4-r">📅 Compare les 2 calendriers et donne une date</div>
+      </div>
+      <div class="s4-ex">
+        <div class="s4-q">Je suis fatiguée, j'ai besoin de repos</div>
+        <div class="s4-r">😴 Repère un week-end libre + suggestion concrète</div>
+      </div>
+      <div class="s4-ex">
+        <div class="s4-q">Jeudi 28 mai j'ai deux RDV, c'est chargé ?</div>
+        <div class="s4-r">⚠️ Alerte sur les conflits + calcul du trajet</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Slide 5 : La tech ── -->
+  <div class="slide" id="s5">
+    <div class="s5-label">La technique</div>
+    <div class="s5-title">Comment c'est fait ?</div>
+    <div class="s5-grid">
+      <div class="s5-card">
+        <div class="s5-card-icon">🟢</div>
+        <div class="s5-card-name">Node.js</div>
+        <div class="s5-card-desc">Le serveur web qui fait tourner l'app sur ton ordi</div>
+      </div>
+      <div class="s5-card">
+        <div class="s5-card-icon">🤖</div>
+        <div class="s5-card-name">Claude API</div>
+        <div class="s5-card-desc">L'IA d'Anthropic qui comprend et répond en français</div>
+      </div>
+      <div class="s5-card">
+        <div class="s5-card-icon">🌐</div>
+        <div class="s5-card-name">HTML / CSS / JS</div>
+        <div class="s5-card-desc">L'interface que tu vois dans ton navigateur</div>
+      </div>
+      <div class="s5-card">
+        <div class="s5-card-icon">📆</div>
+        <div class="s5-card-name">Fichiers iCal</div>
+        <div class="s5-card-desc">Export Google Calendar lu directement par l'IA</div>
+      </div>
+    </div>
+    <div class="s5-built">⚡ Conçu avec Claude Code (Anthropic) en quelques heures</div>
+  </div>
+
+</div>
+
+<!-- Navigation -->
+<div class="nav">
+  <button class="nav-btn" id="prev">←</button>
+  <div class="nav-dots" id="dots"></div>
+  <button class="nav-btn" id="next">→</button>
+</div>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dotsEl = document.getElementById('dots');
+  const numEl  = document.getElementById('slide-num');
+  let current  = 0;
+
+  // Créer les points
+  slides.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  });
+
+  function goTo(n) {
+    slides[current].classList.remove('active');
+    dotsEl.children[current].classList.remove('active');
+    current = (n + slides.length) % slides.length;
+    slides[current].classList.add('active');
+    dotsEl.children[current].classList.add('active');
+    numEl.textContent = (current + 1) + ' / ' + slides.length;
+  }
+
+  document.getElementById('prev').addEventListener('click', () => goTo(current - 1));
+  document.getElementById('next').addEventListener('click', () => goTo(current + 1));
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') goTo(current + 1);
+    if (e.key === 'ArrowLeft') goTo(current - 1);
+  });
+</script>
+</body>
+</html>
