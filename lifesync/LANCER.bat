@@ -3,6 +3,9 @@ setlocal enabledelayedexpansion
 chcp 65001 >nul
 title LifeSync
 
+:: Se placer dans le dossier du fichier .bat (IMPORTANT)
+cd /d "%~dp0"
+
 echo.
 echo  ================================
 echo     LifeSync - Planificateur IA
