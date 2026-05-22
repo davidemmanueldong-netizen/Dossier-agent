@@ -35,16 +35,15 @@ if not exist ".env" (
     echo.
 )
 
-echo  Lancement en cours...
-echo  L'application va s'ouvrir dans ton navigateur.
-echo  (Pour arreter : ferme cette fenetre)
+echo  Lancement du serveur...
+echo  Le navigateur va s'ouvrir dans 4 secondes.
+echo  Ne ferme pas cette fenetre !
 echo.
 
-:: Ouvrir le navigateur apres 2 secondes
-timeout /t 2 /nobreak >nul
-start "" "http://localhost:4174"
+:: Ouvrir le navigateur dans 4 secondes (en arriere-plan)
+start cmd /c "timeout /t 4 /nobreak >nul && start http://localhost:4174"
 
-:: Lancer le serveur
+:: Lancer le serveur (au premier plan)
 node server.js
 
 pause
