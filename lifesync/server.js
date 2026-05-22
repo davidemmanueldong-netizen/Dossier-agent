@@ -229,10 +229,10 @@ const server = http.createServer(async (req, res) => {
       const david    = loadCalendar('david.ics', 'David');
       const { text: reply, usage } = await callClaude(messages);
       const sources = [
-        { icon: 'gcal',   name: 'Google Calendar', detail: `Wellyane — ${wellyane.length} événements` },
-        { icon: 'gcal',   name: 'Google Calendar', detail: `David — ${david.length} événements` },
-        { icon: 'flo',    name: 'Flo',             detail: 'Suivi de cycle actif' },
-        { icon: 'claude', name: 'Claude AI',        detail: `${CLAUDE_MODEL} · ${usage.input_tokens || '?'} → ${usage.output_tokens || '?'} tokens` },
+        { icon: 'gcal',     name: 'Google Calendar', detail: `Wellyane — ${wellyane.length} événements` },
+        { icon: 'gcal',     name: 'Google Calendar', detail: `David — ${david.length} événements` },
+        { icon: 'doctolib', name: 'Doctolib',        detail: 'Suggestions de RDV médicaux' },
+        { icon: 'flo',      name: 'Flo',             detail: 'Suivi de cycle actif' },
       ];
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ message: reply, sources }));

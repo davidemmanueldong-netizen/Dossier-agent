@@ -182,8 +182,8 @@ async function sendMessage(text) {
 
 // ── Console de log ───────────────────────────────────────────────────────
 const logEntriesEl = document.getElementById('log-entries');
-const ICON_MAP = { gcal: 'log-icon-gcal', flo: 'log-icon-flo', claude: 'log-icon-claude' };
-const EMOJI_MAP = { gcal: '📅', flo: '🌸', claude: '🤖' };
+const ICON_MAP  = { gcal: 'log-icon-gcal', flo: 'log-icon-flo', doctolib: 'log-icon-doctolib' };
+const EMOJI_MAP = { gcal: '📅', flo: '🌸', doctolib: '🏥' };
 
 function addLogEntry(sources) {
   const empty = logEntriesEl.querySelector('.log-empty');
