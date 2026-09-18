@@ -7,7 +7,8 @@ Prototype interactif de la « Visite immersive du Resort » : [prototype/index.h
 Fonctionnalités du prototype :
 - 7 scènes explorables (Entrée, Piscine, Le Riad Exclusive Collection, Restaurant, Oasis Famille, Golf, Espaces sports), chacune avec de vraies photos libres de droits et des points d'intérêt cliquables (padel, chambres, spa, club enfants...).
 - Chaque vue se glisse à la souris/au doigt et se zoome (+/−) pour l'explorer, comme une vraie visite immersive.
-- Deux vidéos façon spot publicitaire (bouton « Voir la vidéo », ~15-20s) : carton de titre, séquence réelle avec son d'ambiance, carton de fin, le tout sur une musique de fond — vraies vidéos et musique libres de droits, intégrées directement dans la page.
+- Deux vidéos façon spot publicitaire (bouton « Voir la vidéo », ~15-20s) : carton de titre, séquence réelle avec son d'ambiance, carton de fin, le tout sur une musique de fond au volume renforcé — vraies vidéos et musique libres de droits, intégrées directement dans la page.
+- Un troisième format vidéo (bouton « 🎬 Découvrir l'appli » en haut à droite) : une présentation animée façon G.O. Club Med — « Léa, animatrice » introduit la Visite immersive du Resort avec un message RSE (photos sincères, moins de déception, moins de gaspillage). Les propos de Léa sont simulés par des sous-titres animés sur une photo avec effet de zoom, il n'y a pas de voix off réellement enregistrée.
 - Le menu du restaurant est un exemple détaillé (entrées/plats/desserts avec prix) — fictif, à des fins de démonstration.
 - La barre de navigation du haut, le logo « Club Med » et la galerie de vignettes sont tous cliquables et mènent aux bonnes scènes/points d'intérêt.
 - Un assistant de conversation (💬 en bas à droite) répond à quelques questions types sur le resort — un chatbot de démonstration à réponses préprogrammées, pas une IA connectée.
