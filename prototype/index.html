@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Club Med — Visite immersive du Resort (prototype)</title>
+<style>
+  :root {
+    --navy: #0f2233;
+    --navy-light: #16334a;
+    --cream: #f6f1e9;
+    --accent: #d9a94f;
+    --text: #1c2b36;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: #0a1620;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+  #app {
+    width: 100%;
+    max-width: 1180px;
+    background: #000;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+  }
+  /* --- Header --- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    background: rgba(15,34,51,0.55);
+    position: relative;
+    z-index: 3;
+    flex-wrap: wrap;
+  }
+  .logo { color: #fff; font-weight: 700; font-size: 1.2rem; letter-spacing: 0.5px; }
+  nav { display: flex; gap: 6px; flex-wrap: wrap; }
+  nav button {
+    background: rgba(255,255,255,0.9);
+    border: none;
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    color: var(--navy);
+    font-weight: 500;
+  }
+  nav button.active { background: var(--navy); color: #fff; }
+  .header-right { display: flex; align-items: center; gap: 8px; }
+  #cartBtn {
+    background: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  #menuBtn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+  }
+
+  /* --- Scene --- */
+  #sceneWrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9.4;
+    overflow: hidden;
+  }
+  .scene {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background-size: cover;
+    background-position: center;
+  }
+  .scene.active { display: block; }
+  .scene::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.05) 25%, rgba(0,0,0,0.05) 65%, rgba(0,0,0,0.5) 100%);
+    pointer-events: none;
+  }
+  .scene-caption {
+    position: absolute;
+    top: 74px;
+    left: 24px;
+    color: #fff;
+    z-index: 2;
+    max-width: 60%;
+  }
+  .scene-caption .place { font-size: 1.5rem; font-weight: 700; margin: 0; }
+  .scene-caption .country { font-size: 0.85rem; opacity: 0.85; margin: 2px 0 10px; }
+  .scene-caption .tagline { font-style: italic; font-size: 1rem; opacity: 0.95; }
+  .mock-note {
+    position: absolute;
+    bottom: 10px;
+    left: 20px;
+    font-size: 0.65rem;
+    color: rgba(255,255,255,0.55);
+    z-index: 2;
+  }
+
+  .hotspot {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+    cursor: pointer;
+  }
+  .hotspot .pin {
+    background: rgba(10,20,25,0.75);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .hotspot .dot {
+    width: 26px; height: 26px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    margin: 6px auto 0;
+    background: rgba(255,255,255,0.15);
+  }
+  .hotspot.selected .pin { background: var(--accent); color: #1a1200; border-color: #fff; }
+
+  .navchevrons {
+    position: absolute;
+    left: 50%;
+    bottom: 90px;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    color: #fff;
+    z-index: 2;
+    cursor: pointer;
+    font-size: 0.75rem;
+    opacity: 0.9;
+  }
+
+  .compass {
+    position: absolute;
+    left: 20px;
+    bottom: 70px;
+    width: 56px; height: 56px;
+    border: 1px solid rgba(255,255,255,0.5);
+    border-radius: 50%;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    z-index: 2;
+  }
+  .immersive-pill {
+    position: absolute;
+    left: 20px;
+    bottom: 20px;
+    background: rgba(10,20,25,0.75);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    z-index: 2;
+  }
+
+  /* mini-map */
+  #minimap {
+    position: absolute;
+    top: 74px;
+    right: 20px;
+    width: 190px;
+    background: rgba(10,20,25,0.75);
+    border-radius: 12px;
+    padding: 10px;
+    z-index: 3;
+    color: #fff;
+    transition: opacity 0.2s ease;
+  }
+  #minimap.dimmed { opacity: 0.35; }
+  #minimap .grid {
+    position: relative;
+    height: 90px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #234, #123);
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  #minimap .grid button {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: var(--accent);
+    padding: 0;
+    cursor: pointer;
+  }
+  #minimap .grid button.current { background: #4fd97a; }
+  #minimap p { margin: 0; font-size: 0.72rem; text-align: center; opacity: 0.9; }
+
+  /* info panel */
+  #infoPanel {
+    position: absolute;
+    top: 218px;
+    right: 20px;
+    width: 300px;
+    max-height: calc(100% - 250px);
+    overflow-y: auto;
+    background: #fff;
+    border-radius: 14px;
+    z-index: 5;
+    display: none;
+  }
+  #infoPanel.open { display: block; }
+  #infoPanel .photo {
+    height: 130px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+  }
+  #infoPanel .photo button.close {
+    position: absolute; top: 8px; right: 8px;
+    width: 28px; height: 28px; border-radius: 50%;
+    border: none; background: rgba(0,0,0,0.6); color: #fff; cursor: pointer;
+  }
+  #infoPanel .body { padding: 16px; }
+  #infoPanel .tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); font-weight: 700; }
+  #infoPanel h3 { margin: 4px 0 8px; font-size: 1.15rem; }
+  #infoPanel p.desc { font-size: 0.85rem; line-height: 1.4; color: #445; margin-bottom: 12px; }
+  #infoPanel .meta { display: flex; gap: 14px; font-size: 0.72rem; color: #556; margin-bottom: 12px; flex-wrap: wrap; }
+  #infoPanel .meta div strong { display: block; font-size: 0.8rem; color: var(--text); }
+  #infoPanel button.primary {
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    padding: 11px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 8px;
+  }
+  #infoPanel button.secondary {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #cbd3d8;
+    border-radius: 24px;
+    padding: 10px;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  #infoPanel button.secondary.added { border-color: #2e7d32; color: #2e7d32; }
+  .perso-card {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    border: 1px solid #e3e6e8;
+    border-radius: 12px;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+  .perso-card .thumb { width: 44px; height: 44px; border-radius: 8px; background-size: cover; background-position: center; flex-shrink: 0; }
+  .perso-card .info { flex: 1; }
+  .perso-card .info b { font-size: 0.78rem; display: block; }
+  .perso-card .info span { font-size: 0.7rem; color: #667; }
+  .perso-card button {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: none; background: var(--navy); color: #fff; cursor: pointer; font-size: 1rem;
+  }
+  .perso-card button.added { background: #2e7d32; }
+
+  /* thumbnail strip */
+  #strip {
+    display: flex;
+    gap: 8px;
+    padding: 10px;
+    overflow-x: auto;
+    background: #0a1620;
+  }
+  #strip .thumb {
+    flex: 0 0 auto;
+    width: 92px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0.75;
+  }
+  #strip .thumb.active { opacity: 1; }
+  #strip .thumb .img {
+    width: 92px; height: 60px;
+    border-radius: 8px;
+    background-size: cover;
+    background-position: center;
+    border: 2px solid transparent;
+  }
+  #strip .thumb.active .img { border-color: #4aa3ff; }
+  #strip .thumb span { display: block; font-size: 0.65rem; color: #fff; margin-top: 4px; line-height: 1.15; }
+
+  /* footer */
+  footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background: #fff;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer .brand { font-weight: 700; font-size: 0.85rem; color: var(--navy); }
+  footer .sub { font-size: 0.75rem; color: #667; }
+  footer .tagline { font-style: italic; font-size: 0.8rem; color: #556; }
+  footer button {
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 9px 18px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* cart drawer */
+  #cartDrawer {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+  }
+  #cartDrawer.open { display: flex; }
+  #cartBox {
+    background: #fff;
+    border-radius: 14px;
+    width: 90%;
+    max-width: 380px;
+    padding: 20px;
+  }
+  #cartBox h3 { margin-top: 0; }
+  #cartItems p { font-size: 0.85rem; margin: 6px 0; }
+  #cartItems .empty { color: #778; font-style: italic; }
+  #cartBox button.primary {
+    width: 100%;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 22px;
+    padding: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 12px;
+  }
+  #cartBox button.secondary {
+    width: 100%;
+    background: #fff;
+    border: 1px solid #cbd3d8;
+    border-radius: 22px;
+    padding: 9px;
+    margin-top: 8px;
+    cursor: pointer;
+  }
+
+  #toastContainer {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+  .toast {
+    background: rgba(15,34,51,0.95);
+    color: #fff;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+  }
+
+  #note {
+    max-width: 1180px;
+    color: #cbd3d8;
+    font-size: 0.78rem;
+    text-align: center;
+    margin-top: 12px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div id="toastContainer"></div>
+
+<div id="app">
+  <header>
+    <div class="logo">Club Med</div>
+    <nav id="navPills"></nav>
+    <div class="header-right">
+      <button id="cartBtn">♡ Mon séjour (<span id="cartCount">0</span>)</button>
+      <button id="menuBtn">☰</button>
+    </div>
+  </header>
+
+  <div id="sceneWrap">
+    <!-- scenes injected by JS -->
+    <div id="minimap">
+      <div class="grid" id="minimapGrid"></div>
+      <p>Voir le plan du Resort</p>
+    </div>
+    <div id="infoPanel"></div>
+  </div>
+
+  <div id="strip"></div>
+
+  <footer>
+    <div>
+      <div class="brand">Club Med</div>
+      <div class="sub" id="footerResort">Marrakech la Palmeraie</div>
+    </div>
+    <div class="tagline" id="footerTagline">Bien plus qu'un voyage, une expérience.</div>
+    <button id="footerCta">Voir mes disponibilités →</button>
+  </footer>
+</div>
+
+<div id="cartDrawer">
+  <div id="cartBox">
+    <h3>♡ Mon séjour</h3>
+    <div id="cartItems"></div>
+    <button class="primary" id="cartCtaBtn">Voir mes disponibilités →</button>
+    <button class="secondary" id="cartCloseBtn">Continuer l'exploration</button>
+  </div>
+</div>
+
+<p id="note">
+  Prototype de démonstration — les vues de resort sont des illustrations de substitution
+  (aucune photographie réelle Club Med n'est utilisée). Il illustre le mécanisme décrit dans le
+  dossier : remplacer les galeries génériques par une exploration immersive et personnalisable,
+  pour réduire l'abandon de panier au moment de la réservation.
+</p>
+
+<script>
+(function () {
+  "use strict";
+
+  const NAV_ITEMS = ["Explorer", "Activités", "Hébergements", "Restauration", "Bien-être", "Famille", "Le Riad"];
+
+  const SCENES = {
+    entree: {
+      label: "Entrée du Resort",
+      place: "Marrakech La Palmeraie",
+      country: "Maroc",
+      tagline: "Bien plus qu'un voyage, une expérience.",
+      gradient: "radial-gradient(circle at 30% 30%, #7a5a3a, #3a2a1a 70%)",
+      icon: "🌴",
+      mapPos: { x: 30, y: 55 },
+      hotspots: [
+        {
+          id: "padel", label: "🎾 Padel", x: 24, y: 46,
+          tag: "Nouvelle expérience à Marrakech", title: "Padel",
+          desc: "Découvrez nos terrains de padel au cœur de la Palmeraie. Que vous soyez débutant ou confirmé, profitez d'un cadre exceptionnel pour jouer et progresser.",
+          meta: [["Horaires", "08h00 – 20h00"], ["Options", "Séance privée avec coach"], ["Durée", "2 h ou 3 h"]],
+          primaryLabel: "Réserver une séance privée"
+        },
+        {
+          id: "piscine-principale", label: "🏊 Piscine principale", x: 43, y: 34,
+          tag: "Détente", title: "Piscine principale",
+          desc: "Un vaste espace au cœur de la Palmeraie pour se détendre et profiter du soleil marocain. Transats, service bar et ambiance conviviale.",
+          meta: [["Horaires", "09h00 – 19h00"], ["Options", "Cabana privée"]],
+          primaryLabel: "Ajouter au séjour"
+        },
+        {
+          id: "chambres", label: "🛏️ Chambres", x: 65, y: 27,
+          tag: "Hébergement", title: "Chambres familiales",
+          desc: "Des chambres pensées pour les familles, à proximité des piscines et des espaces enfants du resort.",
+          meta: [["Vue", "Jardin ou piscine"], ["Capacité", "2 à 4 personnes"]],
+          primaryLabel: "Ajouter au séjour"
+        },
+        {
+          id: "spa", label: "🧖 Spa", x: 78, y: 45,
+          tag: "Bien-être", title: "Spa",
+          desc: "Un espace de bien-être au calme, avec soins et massages pour se ressourcer pendant le séjour.",
+          meta: [["Horaires", "10h00 – 20h00"], ["Options", "Soins duo"]],
+          primaryLabel: "Ajouter au séjour"
+        }
+      ]
+    },
+    riad: {
+      label: "Le Riad — Exclusive Collection",
+      place: "Marrakech La Palmeraie",
+      country: "Maroc",
+      tagline: "L'art de vivre marocain, dans un cadre d'exception.",
+      gradient: "radial-gradient(circle at 60% 40%, #8a6a2a, #241c10 75%)",
+      icon: "🏮",
+      mapPos: { x: 55, y: 30 },
+      isRiad: true,
+      hotspots: [
+        { id: "suite-riad", label: "＋ Suite Riad", x: 22, y: 42 },
+        { id: "salon-riad", label: "＋ Salon du Riad", x: 45, y: 44 },
+        { id: "restaurant-prive", label: "＋ Restaurant privé", x: 70, y: 40 },
+        { id: "espace-detente", label: "＋ Espace détente", x: 15, y: 62 },
+        { id: "piscine-riad", label: "＋ Piscine du Riad", x: 78, y: 62 }
+      ],
+      personalization: [
+        { id: "diner-prive", title: "Dîner privé dans le Riad", desc: "Un dîner d'exception dans un cadre intimiste.", price: "À partir de 120 € / pers." },
+        { id: "massage-riad", title: "Massage au spa du Riad", desc: "Un moment de bien-être sur mesure.", price: "À partir de 90 € / pers." }
+      ]
+    },
+    piscine: {
+      label: "Piscine principale",
+      place: "Marrakech La Palmeraie",
+      country: "Maroc",
+      tagline: "Soleil, détente et art de vivre au cœur de la Palmeraie.",
+      gradient: "radial-gradient(circle at 50% 60%, #2c6e8f, #0d2230 75%)",
+      icon: "🌊",
+      mapPos: { x: 40, y: 70 },
+      hotspots: [
+        {
+          id: "bar-piscine", label: "🍹 Bar de la piscine", x: 15, y: 47,
+          tag: "Détente", title: "Bar de la piscine",
+          desc: "Rafraîchissements et cocktails au bord de l'eau, dans une ambiance conviviale.",
+          meta: [["Horaires", "10h00 – 18h00"]],
+          primaryLabel: "Ajouter au séjour"
+        },
+        {
+          id: "espace-familles", label: "🏖️ Espace familles", x: 43, y: 34,
+          tag: "Famille", title: "Espace familles",
+          desc: "Un vaste espace au cœur de la Palmeraie pour se détendre et profiter du soleil marocain. Transats, service bar et ambiance conviviale.",
+          meta: [["Grande piscine", "extérieure"], ["Options", "Transats & parasols"], ["Service", "Bar"], ["Proximité", "Espace famille"]],
+          primaryLabel: "Ajouter à mon séjour"
+        },
+        {
+          id: "cabanas", label: "🛋️ Cabanas privées", x: 65, y: 40,
+          tag: "Premium", title: "Cabanas privées",
+          desc: "Réservez votre cabana privée pour une demi-journée et profitez d'un service dédié.",
+          meta: [["Horaires", "09h00 – 19h00"], ["Options", "Cabana privée"], ["Durée", "Demi-journée ou journée"]],
+          primaryLabel: "Ajouter à mon séjour"
+        },
+        {
+          id: "piscine-zen", label: "🌿 Piscine Zen", x: 80, y: 55,
+          tag: "Détente", title: "Piscine Zen",
+          desc: "Un espace plus calme, à l'écart de l'animation, pour se détendre en toute tranquillité.",
+          meta: [["Ambiance", "Calme"]],
+          primaryLabel: "Ajouter au séjour"
+        }
+      ]
+    }
+  };
+
+  const STRIP = [
+    { key: "entree", label: "Entrée du Resort" },
+    { key: "piscine", label: "Piscine principale" },
+    { key: "entree", focus: "padel", label: "Terrains de Padel" },
+    { key: "riad", label: "Le Riad\nExclusive Collection" },
+    { key: "placeholder", label: "Chambres" },
+    { key: "placeholder", label: "Restaurant" },
+    { key: "placeholder", label: "Spa" },
+    { key: "placeholder", label: "Oasis Famille" },
+    { key: "placeholder", label: "Golf" },
+    { key: "placeholder", label: "Espaces sports" }
+  ];
+
+  const cart = [];
+  let currentSceneKey = "entree";
+
+  const sceneWrap = document.getElementById("sceneWrap");
+  const infoPanel = document.getElementById("infoPanel");
+  const stripEl = document.getElementById("strip");
+  const navPillsEl = document.getElementById("navPills");
+  const minimapGrid = document.getElementById("minimapGrid");
+  const cartCountEl = document.getElementById("cartCount");
+  const cartDrawer = document.getElementById("cartDrawer");
+  const cartItemsEl = document.getElementById("cartItems");
+
+  function showToast(text) {
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.textContent = text;
+    document.getElementById("toastContainer").appendChild(el);
+    setTimeout(() => el.remove(), 2600);
+  }
+
+  function updateCartUI() {
+    cartCountEl.textContent = cart.length;
+    if (cart.length === 0) {
+      cartItemsEl.innerHTML = '<p class="empty">Votre séjour est encore vide. Explorez le resort pour ajouter des espaces et des options.</p>';
+    } else {
+      cartItemsEl.innerHTML = cart.map((c) => "<p>✓ " + c + "</p>").join("");
+    }
+  }
+
+  function addToCart(label) {
+    if (cart.includes(label)) {
+      showToast("Déjà ajouté à votre séjour");
+      return;
+    }
+    cart.push(label);
+    updateCartUI();
+    showToast("Ajouté à votre séjour : " + label);
+  }
+
+  function buildNav() {
+    navPillsEl.innerHTML = "";
+    NAV_ITEMS.forEach((item, i) => {
+      const btn = document.createElement("button");
+      btn.textContent = item;
+      if (i === 0) btn.classList.add("active");
+      btn.addEventListener("click", () => {
+        [...navPillsEl.children].forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+        if (item === "Le Riad") {
+          switchScene("riad");
+        } else if (item !== "Explorer") {
+          showToast("Section « " + item + " » non incluse dans ce prototype");
+        }
+      });
+      navPillsEl.appendChild(btn);
+    });
+  }
+
+  function buildScenes() {
+    Object.keys(SCENES).forEach((key) => {
+      const scene = SCENES[key];
+      const div = document.createElement("div");
+      div.className = "scene";
+      div.id = "scene-" + key;
+      div.style.background = scene.gradient;
+
+      const bigIcon = document.createElement("div");
+      bigIcon.style.position = "absolute";
+      bigIcon.style.inset = "0";
+      bigIcon.style.display = "flex";
+      bigIcon.style.alignItems = "center";
+      bigIcon.style.justifyContent = "center";
+      bigIcon.style.fontSize = "7rem";
+      bigIcon.style.opacity = "0.25";
+      bigIcon.textContent = scene.icon;
+      div.appendChild(bigIcon);
+
+      const caption = document.createElement("div");
+      caption.className = "scene-caption";
+      caption.innerHTML =
+        '<p class="place">' + scene.place + "</p>" +
+        '<p class="country">' + scene.country + "</p>" +
+        '<p class="tagline">' + scene.tagline + "</p>";
+      div.appendChild(caption);
+
+      const mockNote = document.createElement("div");
+      mockNote.className = "mock-note";
+      mockNote.textContent = "Illustration de substitution — " + scene.label;
+      div.appendChild(mockNote);
+
+      scene.hotspots.forEach((h) => {
+        const hs = document.createElement("div");
+        hs.className = "hotspot";
+        hs.style.left = h.x + "%";
+        hs.style.top = h.y + "%";
+        hs.dataset.id = h.id;
+        hs.innerHTML = '<div class="pin">' + h.label + '</div><div class="dot"></div>';
+        hs.addEventListener("click", () => selectHotspot(key, h.id));
+        div.appendChild(hs);
+      });
+
+      const chevrons = document.createElement("div");
+      chevrons.className = "navchevrons";
+      chevrons.innerHTML = "⌃<br>Avancer<br>⌄";
+      chevrons.addEventListener("click", nextScene);
+      div.appendChild(chevrons);
+
+      const compass = document.createElement("div");
+      compass.className = "compass";
+      compass.innerHTML = "N<br>O&nbsp;&nbsp;E<br>S";
+      div.appendChild(compass);
+
+      const pill = document.createElement("div");
+      pill.className = "immersive-pill";
+      pill.textContent = "📍 Vue immersive 360°";
+      div.appendChild(pill);
+
+      sceneWrap.insertBefore(div, document.getElementById("minimap"));
+    });
+  }
+
+  function buildMinimap() {
+    minimapGrid.innerHTML = "";
+    Object.keys(SCENES).forEach((key) => {
+      const scene = SCENES[key];
+      const btn = document.createElement("button");
+      btn.style.left = scene.mapPos.x + "%";
+      btn.style.top = scene.mapPos.y + "%";
+      btn.dataset.key = key;
+      btn.title = scene.label;
+      btn.addEventListener("click", () => switchScene(key));
+      minimapGrid.appendChild(btn);
+    });
+    refreshMinimap();
+  }
+
+  function refreshMinimap() {
+    [...minimapGrid.children].forEach((b) => {
+      b.classList.toggle("current", b.dataset.key === currentSceneKey);
+    });
+  }
+
+  function buildStrip() {
+    stripEl.innerHTML = "";
+    STRIP.forEach((item, index) => {
+      const div = document.createElement("div");
+      div.className = "thumb";
+      div.dataset.index = index;
+      const scene = item.key !== "placeholder" ? SCENES[item.key] : null;
+      div.innerHTML =
+        '<div class="img" style="background:' + (scene ? scene.gradient : "linear-gradient(135deg,#333,#111)") + '"></div>' +
+        "<span>" + item.label.replace("\n", "<br>") + "</span>";
+      div.addEventListener("click", () => {
+        [...stripEl.children].forEach((c) => c.classList.remove("active"));
+        div.classList.add("active");
+        if (item.key === "placeholder") {
+          showToast("Cette zone sera disponible dans une prochaine itération du prototype");
+          return;
+        }
+        switchScene(item.key);
+        if (item.focus) {
+          setTimeout(() => selectHotspot(item.key, item.focus), 250);
+        } else {
+          closeInfoPanel();
+        }
+      });
+      stripEl.appendChild(div);
+    });
+    stripEl.children[0].classList.add("active");
+  }
+
+  function switchScene(key) {
+    currentSceneKey = key;
+    document.querySelectorAll(".scene").forEach((s) => s.classList.remove("active"));
+    document.getElementById("scene-" + key).classList.add("active");
+    document.getElementById("footerTagline").textContent = SCENES[key].tagline;
+    refreshMinimap();
+    closeInfoPanel();
+  }
+
+  function closeInfoPanel() {
+    infoPanel.classList.remove("open");
+    document.getElementById("minimap").classList.remove("dimmed");
+    document.querySelectorAll(".hotspot").forEach((h) => h.classList.remove("selected"));
+  }
+
+  function selectHotspot(sceneKey, hotspotId) {
+    if (sceneKey !== currentSceneKey) switchScene(sceneKey);
+    const scene = SCENES[sceneKey];
+
+    document.querySelectorAll("#scene-" + sceneKey + " .hotspot").forEach((h) => {
+      h.classList.toggle("selected", h.dataset.id === hotspotId);
+    });
+
+    if (scene.isRiad) {
+      renderRiadPanel(scene, hotspotId);
+      return;
+    }
+
+    const h = scene.hotspots.find((x) => x.id === hotspotId);
+    if (!h) return;
+    infoPanel.innerHTML =
+      '<div class="photo" style="background:' + scene.gradient + '">' +
+        '<button class="close" id="infoClose">✕</button>' +
+      "</div>" +
+      '<div class="body">' +
+        '<div class="tag">' + h.tag + "</div>" +
+        "<h3>" + h.title + "</h3>" +
+        '<p class="desc">' + h.desc + "</p>" +
+        '<div class="meta">' + h.meta.map((m) => "<div><span>" + m[0] + "</span><strong>" + m[1] + "</strong></div>").join("") + "</div>" +
+        '<button class="primary" id="infoPrimary">' + h.primaryLabel + "</button>" +
+        '<button class="secondary" id="infoAdd">♡ Ajouter à mon séjour</button>' +
+      "</div>";
+    infoPanel.classList.add("open");
+    document.getElementById("minimap").classList.add("dimmed");
+
+    document.getElementById("infoClose").addEventListener("click", closeInfoPanel);
+    document.getElementById("infoPrimary").addEventListener("click", () => {
+      addToCart(h.title);
+      showToast("Redirection vers la réservation de : " + h.title + " (prototype)");
+    });
+    document.getElementById("infoAdd").addEventListener("click", (e) => {
+      addToCart(h.title);
+      e.target.classList.add("added");
+      e.target.textContent = "✓ Ajouté à mon séjour";
+    });
+  }
+
+  function renderRiadPanel(scene, hotspotId) {
+    infoPanel.innerHTML =
+      '<div class="photo" style="background:' + scene.gradient + '">' +
+        '<button class="close" id="infoClose">✕</button>' +
+      "</div>" +
+      '<div class="body">' +
+        '<div class="tag">👑 Exclusive Collection</div>' +
+        "<h3>Le Riad</h3>" +
+        '<p class="desc">Une expérience ultra-premium au cœur de la Palmeraie. Découvrez un lieu intimiste et raffiné, avec des services personnalisés, une piscine dédiée et des espaces privés réservés aux membres Exclusive Collection.</p>' +
+        '<div id="perso"></div>' +
+        '<button class="primary" id="infoPrimary">Ajouter au séjour</button>' +
+      "</div>";
+    infoPanel.classList.add("open");
+    document.getElementById("minimap").classList.add("dimmed");
+
+    const persoEl = infoPanel.querySelector("#perso");
+    scene.personalization.forEach((p) => {
+      const card = document.createElement("div");
+      card.className = "perso-card";
+      card.innerHTML =
+        '<div class="thumb" style="background:' + scene.gradient + '"></div>' +
+        '<div class="info"><b>' + p.title + "</b><span>" + p.desc + " — " + p.price + "</span></div>" +
+        "<button>＋</button>";
+      card.querySelector("button").addEventListener("click", (e) => {
+        addToCart(p.title);
+        e.target.classList.add("added");
+        e.target.textContent = "✓";
+      });
+      persoEl.appendChild(card);
+    });
+
+    document.getElementById("infoClose").addEventListener("click", closeInfoPanel);
+    document.getElementById("infoPrimary").addEventListener("click", () => {
+      addToCart(hotspotId ? hotspotId.replace(/-/g, " ") : "Le Riad");
+      showToast("Ajouté à votre séjour : Le Riad");
+    });
+  }
+
+  function nextScene() {
+    const keys = Object.keys(SCENES);
+    const idx = keys.indexOf(currentSceneKey);
+    switchScene(keys[(idx + 1) % keys.length]);
+  }
+
+  document.getElementById("cartBtn").addEventListener("click", () => {
+    updateCartUI();
+    cartDrawer.classList.add("open");
+  });
+  document.getElementById("cartCloseBtn").addEventListener("click", () => cartDrawer.classList.remove("open"));
+  document.getElementById("cartCtaBtn").addEventListener("click", () => {
+    showToast("Redirection vers la réservation avec votre séjour personnalisé (prototype)");
+    cartDrawer.classList.remove("open");
+  });
+  document.getElementById("footerCta").addEventListener("click", () => {
+    showToast("Redirection vers la réservation avec votre séjour personnalisé (prototype)");
+  });
+  document.getElementById("menuBtn").addEventListener("click", () => {
+    showToast("Menu non inclus dans ce prototype");
+  });
+
+  buildNav();
+  buildScenes();
+  buildMinimap();
+  buildStrip();
+  switchScene("entree");
+  updateCartUI();
+})();
+</script>
+</body>
+</html>
