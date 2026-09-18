@@ -202,6 +202,112 @@
     font-size: 0.78rem;
     z-index: 2;
   }
+  .drag-hint {
+    position: absolute;
+    left: 190px;
+    bottom: 20px;
+    background: rgba(10,20,25,0.75);
+    color: #fff;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 20px;
+    padding: 7px 14px;
+    font-size: 0.78rem;
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+  }
+  .video-btn {
+    position: absolute;
+    top: 78px;
+    left: 24px;
+    z-index: 2;
+    background: rgba(255,255,255,0.92);
+    color: var(--navy);
+    border: none;
+    border-radius: 20px;
+    padding: 7px 14px 7px 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .video-btn .playIcon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--navy);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+  }
+  .zoom-ctrl {
+    position: absolute;
+    right: 20px;
+    bottom: 20px;
+    z-index: 2;
+    display: flex;
+    gap: 4px;
+  }
+  .zoom-ctrl button {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(10,20,25,0.75);
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    line-height: 1;
+  }
+  #videoModal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+  }
+  #videoModal.open { display: flex; }
+  #videoModal .box {
+    width: 92%;
+    max-width: 780px;
+  }
+  #videoModal video {
+    width: 100%;
+    border-radius: 10px;
+    display: block;
+    background: #000;
+  }
+  #videoModal .videoTop {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #fff;
+    font-size: 0.75rem;
+    margin-bottom: 8px;
+  }
+  #videoModal .videoTop button {
+    background: none;
+    border: 1px solid rgba(255,255,255,0.5);
+    color: #fff;
+    border-radius: 16px;
+    padding: 4px 12px;
+    cursor: pointer;
+  }
+  #videoModal .videoFallback {
+    display: none;
+    color: #fff;
+    background: #1c2b36;
+    padding: 30px 20px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.85rem;
+  }
+  #videoModal.video-error video { display: none; }
+  #videoModal.video-error .videoFallback { display: block; }
 
   /* mini-map */
   #minimap {
@@ -508,6 +614,19 @@
   </footer>
 </div>
 
+<div id="videoModal">
+  <div class="box">
+    <div class="videoTop">
+      <span id="videoCredit"></span>
+      <button id="videoCloseBtn">Fermer ✕</button>
+    </div>
+    <video id="videoPlayer" controls autoplay playsinline></video>
+    <div class="videoFallback" id="videoFallback">
+      Vidéo indisponible — le dossier prototype/videos/ doit accompagner index.html pour que les vidéos se chargent.
+    </div>
+  </div>
+</div>
+
 <div id="cartDrawer">
   <div id="cartBox">
     <h3>♡ Mon séjour</h3>
@@ -525,7 +644,13 @@
   ce ne sont pas des photographies officielles du resort Club Med Marrakech la Palmeraie, qui
   restent à produire en conditions réelles pour une mise en production. La carte du restaurant
   est un exemple fictif construit pour la démonstration, et non la carte réelle d'un resort
-  Club Med.
+  Club Med. Sur chaque vue, glissez avec la souris (ou le doigt sur mobile) pour explorer l'image
+  et utilisez les boutons +/− pour zoomer — les points d'intérêt restent affichés à position fixe
+  pendant l'exploration. Les vidéos (bouton « Voir la vidéo ») sont également de vraies vidéos
+  libres de droits (Wikimedia Commons). Contrairement aux photos, intégrées directement dans la
+  page, elles sont fournies en fichiers séparés dans le dossier prototype/videos/ : elles ne
+  s'afficheront que si ce dossier accompagne bien index.html (clone ou téléchargement complet du
+  dépôt).
 </p>
 <div id="credits"></div>
 
@@ -559,6 +684,21 @@
   };
   const PHOTO = (key) => ASSET_DATA[key];
 
+  // Vraies vidéos libres de droits (Wikimedia Commons), hébergées sur leurs serveurs —
+  // nécessitent une connexion internet pour se charger (contrairement aux photos, intégrées
+  // directement dans la page). Il ne s'agit pas de vidéos officielles Club Med.
+  const VIDEO_CREDITS = {
+    djemaa: { desc: "Ambiance de Marrakech (place Jemaa el-Fna)", author: "Boris Macek (Weekender73)", license: "CC BY-SA 3.0", url: "https://commons.wikimedia.org/wiki/File:Djemaa_el_Fna_Marrakech_Morocco.webm" },
+    splash: { desc: "Éclaboussure d'eau au ralenti", author: "Nesnad", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Slow_Motion_splash_-_2022_Nov_24.webm" }
+  };
+  // Fichiers vidéo à côté de index.html (non intégrés en base64 : trop volumineux).
+  // Contrairement aux photos, ils ne s'affichent que si le dossier prototype/videos/
+  // accompagne bien le fichier HTML (clone/téléchargement du dossier complet).
+  const VIDEO_SRC = {
+    djemaa: "videos/djemaa.webm",
+    splash: "videos/splash.webm"
+  };
+
   const SCENES = {
     entree: {
       label: "Entrée du Resort",
@@ -567,6 +707,7 @@
       tagline: "Bien plus qu'un voyage, une expérience.",
       photo: PHOTO("entree"),
       creditKey: "entree",
+      video: "djemaa",
       mapPos: { x: 30, y: 55 },
       hotspots: [
         {
@@ -627,6 +768,7 @@
       tagline: "Soleil, détente et art de vivre au cœur de la Palmeraie.",
       photo: PHOTO("piscine"),
       creditKey: "piscine",
+      video: "splash",
       mapPos: { x: 40, y: 70 },
       hotspots: [
         {
@@ -822,16 +964,85 @@
       pill.textContent = "📍 Vue immersive 360°";
       div.appendChild(pill);
 
-      // Léger effet de parallaxe au survol pour renforcer la sensation d'immersion
-      // (la photo n'est pas un vrai panorama 360°, mais réagit au mouvement de la souris).
-      div.addEventListener("mousemove", (e) => {
+      const dragHint = document.createElement("div");
+      dragHint.className = "drag-hint";
+      dragHint.textContent = "🖐️ Glissez pour explorer la vue";
+      div.appendChild(dragHint);
+
+      if (scene.video) {
+        const videoBtn = document.createElement("button");
+        videoBtn.className = "video-btn";
+        videoBtn.innerHTML = '<span class="playIcon">▶</span> Voir la vidéo';
+        videoBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          openVideo(scene.video);
+        });
+        div.appendChild(videoBtn);
+      }
+
+      const zoomCtrl = document.createElement("div");
+      zoomCtrl.className = "zoom-ctrl";
+      zoomCtrl.innerHTML = '<button data-dir="out" title="Dézoomer">−</button><button data-dir="in" title="Zoomer">+</button>';
+      div.appendChild(zoomCtrl);
+
+      // Exploration réelle par glisser-déposer (souris et tactile), avec zoom :
+      // la photo n'est pas un panorama 360° natif, mais peut être zoomée/déplacée
+      // comme une vraie vue immersive, contrairement à une simple image statique.
+      let zoom = 130;
+      let posX = 50, posY = 50;
+      let dragging = false, startX = 0, startY = 0, startPosX = 50, startPosY = 50;
+
+      function applyBg() {
+        bg.style.backgroundSize = zoom + "%";
+        bg.style.backgroundPosition = posX + "% " + posY + "%";
+      }
+      applyBg();
+
+      function pointerDown(clientX, clientY) {
+        dragging = true;
+        startX = clientX; startY = clientY;
+        startPosX = posX; startPosY = posY;
+        div.style.cursor = "grabbing";
+        dragHint.style.opacity = "0";
+      }
+      function pointerMove(clientX, clientY) {
+        if (!dragging) return;
         const rect = div.getBoundingClientRect();
-        const px = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
-        const py = ((e.clientY - rect.top) / rect.height - 0.5) * 4;
-        bg.style.backgroundPosition = (50 - px) + "% " + (50 - py) + "%";
-      });
-      div.addEventListener("mouseleave", () => {
-        bg.style.backgroundPosition = "center";
+        const dx = ((clientX - startX) / rect.width) * 100 * (zoom / 100);
+        const dy = ((clientY - startY) / rect.height) * 100 * (zoom / 100);
+        posX = Math.min(100, Math.max(0, startPosX - dx));
+        posY = Math.min(100, Math.max(0, startPosY - dy));
+        applyBg();
+      }
+      function pointerUp() {
+        if (!dragging) return;
+        dragging = false;
+        div.style.cursor = "grab";
+        setTimeout(() => { dragHint.style.opacity = "1"; }, 1200);
+      }
+
+      div.style.cursor = "grab";
+      div.addEventListener("mousedown", (e) => { e.preventDefault(); pointerDown(e.clientX, e.clientY); });
+      window.addEventListener("mousemove", (e) => pointerMove(e.clientX, e.clientY));
+      window.addEventListener("mouseup", pointerUp);
+      div.addEventListener("touchstart", (e) => {
+        const t = e.touches[0];
+        pointerDown(t.clientX, t.clientY);
+      }, { passive: true });
+      div.addEventListener("touchmove", (e) => {
+        const t = e.touches[0];
+        pointerMove(t.clientX, t.clientY);
+      }, { passive: true });
+      div.addEventListener("touchend", pointerUp);
+
+      zoomCtrl.querySelectorAll("button").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          zoom = btn.dataset.dir === "in"
+            ? Math.min(180, zoom + 15)
+            : Math.max(100, zoom - 15);
+          applyBg();
+        });
       });
 
       sceneWrap.insertBefore(div, document.getElementById("minimap"));
@@ -1024,11 +1235,44 @@
 
   function buildCredits() {
     const el = document.getElementById("credits");
-    const items = Object.values(CREDITS).map((c) =>
+    const photoItems = Object.values(CREDITS).map((c) =>
       c.desc + " — " + c.author + ", <a href=\"" + c.url + "\" target=\"_blank\" rel=\"noopener\">Wikimedia Commons</a> (" + c.license + ")"
     );
-    el.innerHTML = "<strong>Crédits photos :</strong> " + items.join(" · ");
+    const videoItems = Object.values(VIDEO_CREDITS).map((c) =>
+      c.desc + " — " + c.author + ", <a href=\"" + c.url + "\" target=\"_blank\" rel=\"noopener\">Wikimedia Commons</a> (" + c.license + ")"
+    );
+    el.innerHTML =
+      "<strong>Crédits photos :</strong> " + photoItems.join(" · ") +
+      "<br><strong>Crédits vidéos :</strong> " + videoItems.join(" · ");
   }
+
+  const videoModal = document.getElementById("videoModal");
+  const videoPlayer = document.getElementById("videoPlayer");
+  const videoCreditEl = document.getElementById("videoCredit");
+
+  function openVideo(videoKey) {
+    const credit = VIDEO_CREDITS[videoKey];
+    videoModal.classList.remove("video-error");
+    videoCreditEl.innerHTML = credit.desc + " — " + credit.author + " (" + credit.license + "), Wikimedia Commons";
+    videoPlayer.src = VIDEO_SRC[videoKey];
+    videoModal.classList.add("open");
+    videoPlayer.play().catch(() => {});
+  }
+
+  function closeVideo() {
+    videoModal.classList.remove("open");
+    videoPlayer.pause();
+    videoPlayer.removeAttribute("src");
+    videoPlayer.load();
+  }
+
+  videoPlayer.addEventListener("error", () => {
+    videoModal.classList.add("video-error");
+  });
+  document.getElementById("videoCloseBtn").addEventListener("click", closeVideo);
+  videoModal.addEventListener("click", (e) => {
+    if (e.target === videoModal) closeVideo();
+  });
 
   function nextScene() {
     const keys = Object.keys(SCENES);
