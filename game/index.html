@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Belambra World — Prototype</title>
+<style>
+  :root {
+    --bg: #0f2027;
+    --grass: #2f8f4e;
+    --grass-dark: #266d3d;
+    --panel: #10202b;
+    --accent: #ffb703;
+    --text: #f1f5f4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(180deg, #0b1d26, #143b4a);
+    color: var(--text);
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 16px;
+  }
+  h1 { margin: 4px 0 12px; font-size: 1.4rem; text-align: center; }
+  #hud {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  #playerName {
+    background: transparent;
+    border: 1px solid #35576515;
+    border-bottom: 1px solid #4a7a8c;
+    color: var(--text);
+    font-weight: bold;
+    font-size: 1rem;
+    padding: 2px 6px;
+    width: 130px;
+  }
+  #hud-right { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; }
+  #xpBarOuter {
+    width: 140px;
+    height: 10px;
+    background: #294c56;
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  #xpBarInner {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 0.3s ease;
+  }
+  #gameWrap {
+    position: relative;
+    width: 640px;
+    max-width: 100%;
+  }
+  canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    background: var(--grass);
+  }
+  #hint {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    pointer-events: none;
+  }
+  .hidden { display: none !important; }
+  #toastContainer {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 5;
+  }
+  .toast {
+    background: rgba(10, 30, 40, 0.92);
+    border-left: 4px solid var(--accent);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    max-width: 240px;
+    animation: fadein 0.2s ease;
+  }
+  @keyframes fadein { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+  #modalOverlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 15, 20, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    z-index: 10;
+  }
+  #modalBox {
+    background: var(--panel);
+    border-radius: 12px;
+    padding: 18px;
+    width: 90%;
+    max-width: 480px;
+    text-align: center;
+  }
+  #modalBox h2 { margin-top: 0; }
+  .track {
+    position: relative;
+    height: 26px;
+    background: #1c3742;
+    border-radius: 14px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .track .target {
+    position: absolute;
+    top: 0; bottom: 0;
+    background: rgba(255,183,3,0.35);
+    border-left: 2px solid var(--accent);
+    border-right: 2px solid var(--accent);
+  }
+  .track .indicator {
+    position: absolute;
+    top: -3px;
+    width: 6px;
+    height: 32px;
+    background: #fff;
+    border-radius: 3px;
+  }
+  button {
+    background: var(--accent);
+    border: none;
+    color: #1a1a1a;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    margin: 4px;
+  }
+  button.secondary { background: #33586a; color: var(--text); }
+  #partyArea {
+    position: relative;
+    height: 220px;
+    background: #1c3742;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 12px 0;
+  }
+  .note {
+    position: absolute;
+    font-size: 1.6rem;
+    cursor: pointer;
+    user-select: none;
+    animation: pop 0.15s ease;
+  }
+  @keyframes pop { from { transform: scale(0.4); } to { transform: scale(1); } }
+  #chatLog {
+    height: 160px;
+    overflow-y: auto;
+    background: #1c3742;
+    border-radius: 8px;
+    padding: 8px;
+    text-align: left;
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+  }
+  #chatLog p { margin: 4px 0; }
+  #chatInputRow { display: flex; gap: 6px; }
+  #chatInput {
+    flex: 1;
+    padding: 6px 10px;
+    border-radius: 16px;
+    border: none;
+    font-size: 0.85rem;
+  }
+  #instructions {
+    max-width: 640px;
+    font-size: 0.8rem;
+    opacity: 0.8;
+    text-align: center;
+    margin-top: 10px;
+  }
+</style>
+</head>
+<body>
+  <h1>🏝️ Belambra World — Prototype du monde virtuel</h1>
+  <div id="hud">
+    <div>🎮 <input id="playerName" type="text" maxlength="16" value="Aventurier"></div>
+    <div id="hud-right">
+      <span id="levelLabel">Niveau 1</span>
+      <div id="xpBarOuter"><div id="xpBarInner"></div></div>
+      <span id="xpLabel">0 / 100 XP</span>
+    </div>
+  </div>
+
+  <div id="gameWrap">
+    <canvas id="game" width="640" height="480"></canvas>
+    <div id="hint" class="hidden"></div>
+    <div id="toastContainer"></div>
+
+    <div id="modalOverlay" class="hidden">
+      <div id="modalBox"></div>
+    </div>
+  </div>
+
+  <p id="instructions">
+    Déplacez-vous avec les flèches ou WASD. Approchez-vous d'une zone d'activité
+    (🎾 tennis, 🎉 soirée virtuelle, 💬 communauté) et appuyez sur <strong>Entrée</strong>
+    pour y participer et gagner des points d'expérience — exactement comme décrit dans
+    le dossier : jouer dans le monde virtuel entre deux séjours pour continuer à gagner des points.
+  </p>
+
+<script>
+(function () {
+  "use strict";
+
+  const SAVE_KEY = "belambraWorldSave";
+  const canvas = document.getElementById("game");
+  const ctx = canvas.getContext("2d");
+  const hint = document.getElementById("hint");
+  const toastContainer = document.getElementById("toastContainer");
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalBox = document.getElementById("modalBox");
+  const playerNameInput = document.getElementById("playerName");
+  const levelLabel = document.getElementById("levelLabel");
+  const xpBarInner = document.getElementById("xpBarInner");
+  const xpLabel = document.getElementById("xpLabel");
+
+  const ZONES = [
+    { id: "tennis", emoji: "🎾", label: "Court de tennis", rect: { x: 40, y: 40, w: 160, h: 110 }, color: "#2e7d32" },
+    { id: "party", emoji: "🎉", label: "Soirée virtuelle", rect: { x: 440, y: 40, w: 160, h: 110 }, color: "#6a1b9a" },
+    { id: "chat", emoji: "💬", label: "Communauté du club", rect: { x: 240, y: 330, w: 160, h: 110 }, color: "#1565c0" }
+  ];
+
+  const XP_PER_LEVEL = 100;
+
+  const state = {
+    xp: 0,
+    lastChatBonusDate: null,
+    name: "Aventurier"
+  };
+
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(SAVE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state.xp = parsed.xp || 0;
+        state.lastChatBonusDate = parsed.lastChatBonusDate || null;
+        state.name = parsed.name || "Aventurier";
+      }
+    } catch (e) { /* localStorage indisponible : on continue avec les valeurs par défaut */ }
+    playerNameInput.value = state.name;
+    updateHud();
+  }
+
+  function saveState() {
+    try {
+      localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    } catch (e) { /* stockage indisponible, tant pis pour la persistance */ }
+  }
+
+  function updateHud() {
+    const level = Math.floor(state.xp / XP_PER_LEVEL) + 1;
+    const xpInLevel = state.xp % XP_PER_LEVEL;
+    levelLabel.textContent = "Niveau " + level;
+    xpBarInner.style.width = xpInLevel + "%";
+    xpLabel.textContent = xpInLevel + " / " + XP_PER_LEVEL + " XP";
+  }
+
+  function awardXP(amount, reason) {
+    state.xp += amount;
+    if (state.xp < 0) state.xp = 0;
+    updateHud();
+    saveState();
+    showToast("+" + amount + " XP — " + reason);
+  }
+
+  function showToast(text) {
+    const el = document.createElement("div");
+    el.className = "toast";
+    el.textContent = text;
+    toastContainer.appendChild(el);
+    setTimeout(() => el.remove(), 3200);
+  }
+
+  playerNameInput.addEventListener("change", () => {
+    state.name = playerNameInput.value.trim() || "Aventurier";
+    saveState();
+  });
+
+  // --- Joueur & déplacement ---
+  const player = { x: 300, y: 220, size: 26, speed: 3 };
+  const keysDown = new Set();
+  let currentZoneId = null;
+  let modalActive = false;
+
+  window.addEventListener("keydown", (e) => {
+    if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].includes(e.key)) e.preventDefault();
+    keysDown.add(e.key.toLowerCase());
+
+    if (!modalActive && (e.key === "Enter" || e.key === " ") && currentZoneId) {
+      e.preventDefault();
+      openActivity(currentZoneId);
+    }
+    if (modalActive && e.key === "Escape") {
+      closeModal();
+    }
+  });
+  window.addEventListener("keyup", (e) => keysDown.delete(e.key.toLowerCase()));
+
+  function rectsOverlap(a, b) {
+    return a.x < b.x + b.w && a.x + a.size > b.x && a.y < b.y + b.h && a.y + a.size > b.y;
+  }
+
+  function update() {
+    if (modalActive) return;
+    let dx = 0, dy = 0;
+    if (keysDown.has("arrowup") || keysDown.has("w")) dy -= 1;
+    if (keysDown.has("arrowdown") || keysDown.has("s")) dy += 1;
+    if (keysDown.has("arrowleft") || keysDown.has("a")) dx -= 1;
+    if (keysDown.has("arrowright") || keysDown.has("d")) dx += 1;
+    if (dx !== 0 && dy !== 0) { dx *= 0.7071; dy *= 0.7071; }
+    player.x = Math.min(canvas.width - player.size, Math.max(0, player.x + dx * player.speed));
+    player.y = Math.min(canvas.height - player.size, Math.max(0, player.y + dy * player.speed));
+
+    const zone = ZONES.find((z) => rectsOverlap(player, z.rect));
+    const zoneId = zone ? zone.id : null;
+    if (zoneId !== currentZoneId) {
+      currentZoneId = zoneId;
+      if (zone) {
+        hint.textContent = "Appuyez sur Entrée pour : " + zone.emoji + " " + zone.label;
+        hint.classList.remove("hidden");
+        showToast("📍 Vous êtes près de " + zone.label);
+      } else {
+        hint.classList.add("hidden");
+      }
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // sol
+    ctx.fillStyle = "#2f8f4e";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(255,255,255,0.06)";
+    for (let x = 0; x < canvas.width; x += 32) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
+    }
+    for (let y = 0; y < canvas.height; y += 32) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+    }
+
+    ZONES.forEach((zone) => {
+      const active = zone.id === currentZoneId;
+      ctx.fillStyle = active ? zone.color : zone.color + "cc";
+      ctx.strokeStyle = active ? "#fff" : "rgba(255,255,255,0.4)";
+      ctx.lineWidth = active ? 3 : 1.5;
+      roundRect(ctx, zone.rect.x, zone.rect.y, zone.rect.w, zone.rect.h, 12);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.font = "26px sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(zone.emoji, zone.rect.x + zone.rect.w / 2, zone.rect.y + zone.rect.h / 2 - 4);
+      ctx.font = "12px sans-serif";
+      ctx.fillText(zone.label, zone.rect.x + zone.rect.w / 2, zone.rect.y + zone.rect.h / 2 + 18);
+    });
+
+    // joueur
+    ctx.font = (player.size + 8) + "px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("🧑", player.x + player.size / 2, player.y + player.size);
+  }
+
+  function roundRect(c, x, y, w, h, r) {
+    c.beginPath();
+    c.moveTo(x + r, y);
+    c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r);
+    c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r);
+    c.closePath();
+  }
+
+  function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // --- Activités / mini-jeux ---
+  function openActivity(zoneId) {
+    modalActive = true;
+    modalOverlay.classList.remove("hidden");
+    if (zoneId === "tennis") openTennis();
+    else if (zoneId === "party") openParty();
+    else if (zoneId === "chat") openChat();
+  }
+
+  function closeModal() {
+    modalActive = false;
+    modalOverlay.classList.add("hidden");
+    modalBox.innerHTML = "";
+  }
+
+  function openTennis() {
+    let attempts = 0;
+    let total = 0;
+    const maxAttempts = 3;
+    modalBox.innerHTML =
+      '<h2>🎾 Tournoi de tennis</h2>' +
+      '<p>Appuyez sur <strong>Espace</strong> (ou le bouton) quand le curseur est dans la zone dorée. ' +
+      maxAttempts + ' essais.</p>' +
+      '<div class="track"><div class="target" id="tennisTarget"></div><div class="indicator" id="tennisIndicator"></div></div>' +
+      '<p id="tennisResult">Essai 1 / ' + maxAttempts + '</p>' +
+      '<button id="tennisHit">Frapper (Espace)</button>' +
+      '<button class="secondary" id="tennisClose">Quitter</button>';
+
+    const target = modalBox.querySelector("#tennisTarget");
+    target.style.left = "42%";
+    target.style.width = "16%";
+
+    const indicator = modalBox.querySelector("#tennisIndicator");
+    let t = 0;
+    let raf;
+    function animate() {
+      t += 0.06;
+      const pos = (Math.sin(t) + 1) / 2 * 94; // 0-94%
+      indicator.style.left = pos + "%";
+      raf = requestAnimationFrame(animate);
+    }
+    animate();
+
+    function hit() {
+      if (attempts >= maxAttempts) return;
+      const pos = parseFloat(indicator.style.left);
+      const distanceFromCenter = Math.abs(pos - 50);
+      let points;
+      if (distanceFromCenter <= 6) points = 40;
+      else if (distanceFromCenter <= 15) points = 20;
+      else points = 5;
+      total += points;
+      attempts++;
+      const resultEl = modalBox.querySelector("#tennisResult");
+      if (attempts < maxAttempts) {
+        resultEl.textContent = "Coup " + attempts + " : +" + points + " pts — Essai " + (attempts + 1) + " / " + maxAttempts;
+      } else {
+        resultEl.textContent = "Match terminé ! Score total : " + total + " pts";
+        cancelAnimationFrame(raf);
+        awardXP(total, "Tournoi de tennis");
+        setTimeout(closeModal, 900);
+      }
+    }
+
+    modalBox.querySelector("#tennisHit").addEventListener("click", hit);
+    function spaceHandler(e) {
+      if (e.key === " ") { e.preventDefault(); hit(); }
+    }
+    window.addEventListener("keydown", spaceHandler);
+
+    modalBox.querySelector("#tennisClose").addEventListener("click", () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("keydown", spaceHandler);
+      closeModal();
+    });
+
+    const originalClose = closeModal;
+    closeModal = function () {
+      cancelAnimationFrame(raf);
+      window.removeEventListener("keydown", spaceHandler);
+      closeModal = originalClose;
+      originalClose();
+    };
+  }
+
+  function openParty() {
+    modalBox.innerHTML =
+      '<h2>🎉 Soirée virtuelle</h2>' +
+      '<p>Cliquez sur les notes de musique avant qu\'elles disparaissent ! (8 secondes)</p>' +
+      '<div id="partyArea"></div>' +
+      '<p id="partyScore">Score : 0 pt</p>' +
+      '<button class="secondary" id="partyClose">Quitter</button>';
+
+    const area = modalBox.querySelector("#partyArea");
+    const scoreEl = modalBox.querySelector("#partyScore");
+    let score = 0;
+    let running = true;
+
+    function spawnNote() {
+      if (!running) return;
+      const note = document.createElement("div");
+      note.className = "note";
+      note.textContent = "🎵";
+      const maxX = area.clientWidth - 30;
+      const maxY = area.clientHeight - 30;
+      note.style.left = Math.max(0, Math.random() * maxX) + "px";
+      note.style.top = Math.max(0, Math.random() * maxY) + "px";
+      note.addEventListener("click", () => {
+        score += 10;
+        awardXP(10, "Soirée virtuelle");
+        scoreEl.textContent = "Score : " + score + " pt";
+        note.remove();
+      });
+      area.appendChild(note);
+      setTimeout(() => note.remove(), 900);
+    }
+
+    const spawnInterval = setInterval(spawnNote, 650);
+    const endTimeout = setTimeout(() => {
+      running = false;
+      clearInterval(spawnInterval);
+      scoreEl.textContent = "Soirée terminée ! Score final : " + score + " pt";
+    }, 8000);
+
+    modalBox.querySelector("#partyClose").addEventListener("click", () => {
+      running = false;
+      clearInterval(spawnInterval);
+      clearTimeout(endTimeout);
+      closeModal();
+    });
+  }
+
+  function todayStr() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function openChat() {
+    const alreadyClaimed = state.lastChatBonusDate === todayStr();
+    modalBox.innerHTML =
+      '<h2>💬 Communauté du club</h2>' +
+      '<div id="chatLog"></div>' +
+      '<div id="chatInputRow">' +
+      '<input id="chatInput" type="text" placeholder="Écris un message...">' +
+      '<button id="chatSend">Envoyer</button>' +
+      '</div>' +
+      '<p id="chatBonusInfo" style="font-size:0.75rem;opacity:0.8;">' +
+      (alreadyClaimed
+        ? "Tu as déjà récupéré ton bonus communautaire aujourd'hui, reviens demain !"
+        : "Bonus de connexion communautaire du jour disponible.") +
+      '</p>' +
+      '<button class="secondary" id="chatClose">Quitter</button>';
+
+    const log = modalBox.querySelector("#chatLog");
+    const scripted = [
+      ["Léa", "Trop hâte de retourner au club cet été ! 🏖️"],
+      ["Sacha", "Vous avez fait le tournoi de tennis virtuel ?"],
+      ["Nino", "Moi j'ai gagné plein de points à la soirée hier soir 🎉"]
+    ];
+
+    function addMessage(author, text) {
+      const p = document.createElement("p");
+      p.innerHTML = "<strong>" + author + " :</strong> " + text;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    scripted.forEach((msg, i) => {
+      setTimeout(() => addMessage(msg[0], msg[1]), 400 * (i + 1));
+    });
+
+    if (!alreadyClaimed) {
+      state.lastChatBonusDate = todayStr();
+      saveState();
+      awardXP(15, "Bonus de connexion communautaire");
+    }
+
+    const input = modalBox.querySelector("#chatInput");
+    const send = modalBox.querySelector("#chatSend");
+    function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      addMessage(state.name, text);
+      input.value = "";
+    }
+    send.addEventListener("click", sendMessage);
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") { e.preventDefault(); sendMessage(); }
+    });
+
+    modalBox.querySelector("#chatClose").addEventListener("click", closeModal);
+  }
+
+  loadState();
+  loop();
+})();
+</script>
+</body>
+</html>
