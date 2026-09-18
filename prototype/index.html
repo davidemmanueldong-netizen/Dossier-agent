@@ -89,10 +89,21 @@
     position: absolute;
     inset: 0;
     display: none;
-    background-size: cover;
-    background-position: center;
+    overflow: hidden;
   }
   .scene.active { display: block; }
+  .scene .bg {
+    position: absolute;
+    inset: -3%;
+    background-size: cover;
+    background-position: center;
+    transition: background-position 0.25s ease-out;
+    animation: kenburns 22s ease-in-out infinite alternate;
+  }
+  @keyframes kenburns {
+    from { transform: scale(1); }
+    to { transform: scale(1.06); }
+  }
   .scene::after {
     content: "";
     position: absolute;
@@ -115,10 +126,12 @@
     position: absolute;
     bottom: 10px;
     left: 20px;
-    font-size: 0.65rem;
-    color: rgba(255,255,255,0.55);
+    font-size: 0.63rem;
+    color: rgba(255,255,255,0.6);
     z-index: 2;
+    max-width: 70%;
   }
+  .mock-note a { color: rgba(255,255,255,0.8); }
 
   .hotspot {
     position: absolute;
@@ -248,6 +261,40 @@
     position: absolute; top: 8px; right: 8px;
     width: 28px; height: 28px; border-radius: 50%;
     border: none; background: rgba(0,0,0,0.6); color: #fff; cursor: pointer;
+  }
+  #infoPanel .photo .credit {
+    position: absolute;
+    bottom: 4px;
+    left: 8px;
+    font-size: 0.6rem;
+    color: rgba(255,255,255,0.85);
+    background: rgba(0,0,0,0.4);
+    padding: 1px 6px;
+    border-radius: 8px;
+  }
+  .menu-category h4 {
+    margin: 14px 0 6px;
+    font-size: 0.82rem;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    border-bottom: 1px solid #e3e6e8;
+    padding-bottom: 4px;
+  }
+  .menu-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 0.8rem;
+    padding: 3px 0;
+    color: #334;
+  }
+  .menu-item span.price { color: var(--accent); font-weight: 700; white-space: nowrap; }
+  .menu-disclaimer {
+    font-size: 0.68rem;
+    color: #889;
+    font-style: italic;
+    margin: 10px 0;
   }
   #infoPanel .body { padding: 16px; }
   #infoPanel .tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); font-weight: 700; }
@@ -415,6 +462,15 @@
     margin-top: 12px;
     line-height: 1.5;
   }
+  #credits {
+    max-width: 1180px;
+    color: #8fa0ac;
+    font-size: 0.68rem;
+    text-align: center;
+    margin-top: 10px;
+    line-height: 1.6;
+  }
+  #credits a { color: #b9c6cf; }
 </style>
 </head>
 <body>
@@ -462,11 +518,16 @@
 </div>
 
 <p id="note">
-  Prototype de démonstration — les vues de resort sont des illustrations de substitution
-  (aucune photographie réelle Club Med n'est utilisée). Il illustre le mécanisme décrit dans le
-  dossier : remplacer les galeries génériques par une exploration immersive et personnalisable,
-  pour réduire l'abandon de panier au moment de la réservation.
+  Prototype de démonstration du mécanisme décrit dans le dossier : remplacer les galeries
+  génériques par une exploration immersive et personnalisable, pour réduire l'abandon de panier
+  au moment de la réservation. Les photos utilisées sont de <strong>vraies photographies</strong>
+  libres de droits (Wikimedia Commons), choisies pour illustrer l'ambiance de chaque espace —
+  ce ne sont pas des photographies officielles du resort Club Med Marrakech la Palmeraie, qui
+  restent à produire en conditions réelles pour une mise en production. La carte du restaurant
+  est un exemple fictif construit pour la démonstration, et non la carte réelle d'un resort
+  Club Med.
 </p>
+<div id="credits"></div>
 
 <script>
 (function () {
@@ -474,39 +535,54 @@
 
   const NAV_ITEMS = ["Explorer", "Activités", "Hébergements", "Restauration", "Bien-être", "Famille", "Le Riad"];
 
+  // Vraies photographies libres de droits (Wikimedia Commons) — voir la section
+  // "Crédits photos" en bas de page pour la source et la licence de chacune.
+  // Il ne s'agit pas de photographies officielles Club Med.
+  const CREDITS = {
+    entree: { desc: "La Palmeraie de Marrakech", author: "Viault", license: "CC BY-SA 3.0", url: "https://commons.wikimedia.org/wiki/File:La_Palmeraie_de_Marrakech_708.JPG" },
+    riad: { desc: "Terrasse d'un riad marocain", author: "Ekaterina Kvelidze", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Courtyard_in_the_roof_or_the_traditional_Moroccan_house_'riad'.jpg" },
+    padel: { desc: "Terrain de padel (Hautes-Pyrénées)", author: "Sotos", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Court_de_padel_de_Horgues_(Hautes-Pyr%C3%A9n%C3%A9es)_1.jpg" },
+    piscine: { desc: "Piscine, El Fenn (Marrakech)", author: "Jason Briscoe / Unsplash", license: "CC0", url: "https://commons.wikimedia.org/wiki/File:El_Fenn,_Marrakesh,_Morocco_(Unsplash).jpg" },
+    tagine: { desc: "Tajine de poulet, citrons confits et olives", author: "Foodista", license: "CC BY 2.0", url: "https://commons.wikimedia.org/wiki/File:Moroccan_food-Chicken_tagine_with_preserved_lemons_and_olives-01.jpg" },
+    spa: { desc: "Salle de massage (Wiki Loves Africa 2021)", author: "Alvinategyeka", license: "CC BY-SA 4.0", url: "https://commons.wikimedia.org/wiki/File:Couples_massage_room_setting.jpg" },
+    chambre: { desc: "Chambre, Beaufort Sukhothai Hotel", author: "Mugimeshi", license: "CC BY 3.0", url: "https://commons.wikimedia.org/wiki/File:Suite_Bedroom_at_Beaufort_Sukhothai_Hotel.jpg" }
+  };
+
+  const PHOTO = (key) => "assets/" + key + ".jpg";
+
   const SCENES = {
     entree: {
       label: "Entrée du Resort",
       place: "Marrakech La Palmeraie",
       country: "Maroc",
       tagline: "Bien plus qu'un voyage, une expérience.",
-      gradient: "radial-gradient(circle at 30% 30%, #7a5a3a, #3a2a1a 70%)",
-      icon: "🌴",
+      photo: PHOTO("entree"),
+      creditKey: "entree",
       mapPos: { x: 30, y: 55 },
       hotspots: [
         {
-          id: "padel", label: "🎾 Padel", x: 24, y: 46,
+          id: "padel", label: "🎾 Padel", x: 24, y: 46, photo: PHOTO("padel"), creditKey: "padel",
           tag: "Nouvelle expérience à Marrakech", title: "Padel",
           desc: "Découvrez nos terrains de padel au cœur de la Palmeraie. Que vous soyez débutant ou confirmé, profitez d'un cadre exceptionnel pour jouer et progresser.",
           meta: [["Horaires", "08h00 – 20h00"], ["Options", "Séance privée avec coach"], ["Durée", "2 h ou 3 h"]],
           primaryLabel: "Réserver une séance privée"
         },
         {
-          id: "piscine-principale", label: "🏊 Piscine principale", x: 43, y: 34,
+          id: "piscine-principale", label: "🏊 Piscine principale", x: 43, y: 34, photo: PHOTO("piscine"), creditKey: "piscine",
           tag: "Détente", title: "Piscine principale",
-          desc: "Un vaste espace au cœur de la Palmeraie pour se détendre et profiter du soleil marocain. Transats, service bar et ambiance conviviale.",
+          desc: "Un espace au cœur de la Palmeraie pour se détendre et profiter du soleil marocain. Transats, service bar et ambiance conviviale.",
           meta: [["Horaires", "09h00 – 19h00"], ["Options", "Cabana privée"]],
           primaryLabel: "Ajouter au séjour"
         },
         {
-          id: "chambres", label: "🛏️ Chambres", x: 65, y: 27,
+          id: "chambres", label: "🛏️ Chambres", x: 65, y: 27, photo: PHOTO("chambre"), creditKey: "chambre",
           tag: "Hébergement", title: "Chambres familiales",
           desc: "Des chambres pensées pour les familles, à proximité des piscines et des espaces enfants du resort.",
           meta: [["Vue", "Jardin ou piscine"], ["Capacité", "2 à 4 personnes"]],
           primaryLabel: "Ajouter au séjour"
         },
         {
-          id: "spa", label: "🧖 Spa", x: 78, y: 45,
+          id: "spa", label: "🧖 Spa", x: 78, y: 45, photo: PHOTO("spa"), creditKey: "spa",
           tag: "Bien-être", title: "Spa",
           desc: "Un espace de bien-être au calme, avec soins et massages pour se ressourcer pendant le séjour.",
           meta: [["Horaires", "10h00 – 20h00"], ["Options", "Soins duo"]],
@@ -519,8 +595,8 @@
       place: "Marrakech La Palmeraie",
       country: "Maroc",
       tagline: "L'art de vivre marocain, dans un cadre d'exception.",
-      gradient: "radial-gradient(circle at 60% 40%, #8a6a2a, #241c10 75%)",
-      icon: "🏮",
+      photo: PHOTO("riad"),
+      creditKey: "riad",
       mapPos: { x: 55, y: 30 },
       isRiad: true,
       hotspots: [
@@ -531,8 +607,8 @@
         { id: "piscine-riad", label: "＋ Piscine du Riad", x: 78, y: 62 }
       ],
       personalization: [
-        { id: "diner-prive", title: "Dîner privé dans le Riad", desc: "Un dîner d'exception dans un cadre intimiste.", price: "À partir de 120 € / pers." },
-        { id: "massage-riad", title: "Massage au spa du Riad", desc: "Un moment de bien-être sur mesure.", price: "À partir de 90 € / pers." }
+        { id: "diner-prive", title: "Dîner privé dans le Riad", desc: "Un dîner d'exception dans un cadre intimiste.", price: "À partir de 120 € / pers.", photo: PHOTO("tagine") },
+        { id: "massage-riad", title: "Massage au spa du Riad", desc: "Un moment de bien-être sur mesure.", price: "À partir de 90 € / pers.", photo: PHOTO("spa") }
       ]
     },
     piscine: {
@@ -540,8 +616,8 @@
       place: "Marrakech La Palmeraie",
       country: "Maroc",
       tagline: "Soleil, détente et art de vivre au cœur de la Palmeraie.",
-      gradient: "radial-gradient(circle at 50% 60%, #2c6e8f, #0d2230 75%)",
-      icon: "🌊",
+      photo: PHOTO("piscine"),
+      creditKey: "piscine",
       mapPos: { x: 40, y: 70 },
       hotspots: [
         {
@@ -554,8 +630,8 @@
         {
           id: "espace-familles", label: "🏖️ Espace familles", x: 43, y: 34,
           tag: "Famille", title: "Espace familles",
-          desc: "Un vaste espace au cœur de la Palmeraie pour se détendre et profiter du soleil marocain. Transats, service bar et ambiance conviviale.",
-          meta: [["Grande piscine", "extérieure"], ["Options", "Transats & parasols"], ["Service", "Bar"], ["Proximité", "Espace famille"]],
+          desc: "Un espace au cœur de la Palmeraie pour se détendre et profiter du soleil marocain. Transats, service bar et ambiance conviviale.",
+          meta: [["Options", "Transats & parasols"], ["Service", "Bar"], ["Proximité", "Espace famille"]],
           primaryLabel: "Ajouter à mon séjour"
         },
         {
@@ -573,17 +649,54 @@
           primaryLabel: "Ajouter au séjour"
         }
       ]
+    },
+    restaurant: {
+      label: "Restaurant principal",
+      place: "Marrakech La Palmeraie",
+      country: "Maroc",
+      tagline: "Les saveurs du Maroc, à toute heure.",
+      photo: PHOTO("tagine"),
+      creditKey: "tagine",
+      mapPos: { x: 65, y: 62 },
+      hotspots: [
+        {
+          id: "carte", label: "🍽️ Voir la carte", x: 50, y: 46, type: "menu",
+          tag: "Restauration", title: "Restaurant principal — La Palmeraie"
+        }
+      ]
     }
+  };
+
+  const MENU = {
+    disclaimer: "Exemple de carte à titre d'illustration du concept — ce n'est pas la carte réelle d'un resort Club Med.",
+    categories: [
+      { name: "Entrées", items: [
+        ["Salade de tomates confites, féta et olives", "9 €"],
+        ["Pastilla au poulet et amandes", "12 €"],
+        ["Velouté de courgettes au cumin", "8 €"]
+      ] },
+      { name: "Plats", items: [
+        ["Tajine de poulet, citrons confits et olives", "22 €"],
+        ["Couscous royal (agneau, poulet, merguez)", "24 €"],
+        ["Loup grillé, légumes de saison", "26 €"],
+        ["Burger végétarien, frites maison", "18 €"]
+      ] },
+      { name: "Desserts", items: [
+        ["Cornes de gazelle, thé à la menthe", "7 €"],
+        ["Orange à la cannelle", "6 €"],
+        ["Fondant au chocolat", "8 €"]
+      ] }
+    ]
   };
 
   const STRIP = [
     { key: "entree", label: "Entrée du Resort" },
     { key: "piscine", label: "Piscine principale" },
-    { key: "entree", focus: "padel", label: "Terrains de Padel" },
+    { key: "entree", focus: "padel", label: "Terrains de Padel", thumbPhoto: PHOTO("padel") },
     { key: "riad", label: "Le Riad\nExclusive Collection" },
-    { key: "placeholder", label: "Chambres" },
-    { key: "placeholder", label: "Restaurant" },
-    { key: "placeholder", label: "Spa" },
+    { key: "entree", focus: "chambres", label: "Chambres", thumbPhoto: PHOTO("chambre") },
+    { key: "restaurant", label: "Restaurant" },
+    { key: "entree", focus: "spa", label: "Spa", thumbPhoto: PHOTO("spa") },
     { key: "placeholder", label: "Oasis Famille" },
     { key: "placeholder", label: "Golf" },
     { key: "placeholder", label: "Espaces sports" }
@@ -653,18 +766,11 @@
       const div = document.createElement("div");
       div.className = "scene";
       div.id = "scene-" + key;
-      div.style.background = scene.gradient;
 
-      const bigIcon = document.createElement("div");
-      bigIcon.style.position = "absolute";
-      bigIcon.style.inset = "0";
-      bigIcon.style.display = "flex";
-      bigIcon.style.alignItems = "center";
-      bigIcon.style.justifyContent = "center";
-      bigIcon.style.fontSize = "7rem";
-      bigIcon.style.opacity = "0.25";
-      bigIcon.textContent = scene.icon;
-      div.appendChild(bigIcon);
+      const bg = document.createElement("div");
+      bg.className = "bg";
+      bg.style.backgroundImage = "url('" + scene.photo + "')";
+      div.appendChild(bg);
 
       const caption = document.createElement("div");
       caption.className = "scene-caption";
@@ -674,9 +780,10 @@
         '<p class="tagline">' + scene.tagline + "</p>";
       div.appendChild(caption);
 
+      const credit = CREDITS[scene.creditKey];
       const mockNote = document.createElement("div");
       mockNote.className = "mock-note";
-      mockNote.textContent = "Illustration de substitution — " + scene.label;
+      mockNote.textContent = "Photo : " + credit.desc + " — " + credit.author + " (" + credit.license + "), Wikimedia Commons";
       div.appendChild(mockNote);
 
       scene.hotspots.forEach((h) => {
@@ -705,6 +812,18 @@
       pill.className = "immersive-pill";
       pill.textContent = "📍 Vue immersive 360°";
       div.appendChild(pill);
+
+      // Léger effet de parallaxe au survol pour renforcer la sensation d'immersion
+      // (la photo n'est pas un vrai panorama 360°, mais réagit au mouvement de la souris).
+      div.addEventListener("mousemove", (e) => {
+        const rect = div.getBoundingClientRect();
+        const px = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+        const py = ((e.clientY - rect.top) / rect.height - 0.5) * 4;
+        bg.style.backgroundPosition = (50 - px) + "% " + (50 - py) + "%";
+      });
+      div.addEventListener("mouseleave", () => {
+        bg.style.backgroundPosition = "center";
+      });
 
       sceneWrap.insertBefore(div, document.getElementById("minimap"));
     });
@@ -738,8 +857,9 @@
       div.className = "thumb";
       div.dataset.index = index;
       const scene = item.key !== "placeholder" ? SCENES[item.key] : null;
+      const photo = item.thumbPhoto || (scene ? scene.photo : null);
       div.innerHTML =
-        '<div class="img" style="background:' + (scene ? scene.gradient : "linear-gradient(135deg,#333,#111)") + '"></div>' +
+        '<div class="img" style="' + (photo ? "background-image:url('" + photo + "')" : "background:linear-gradient(135deg,#333,#111)") + '"></div>' +
         "<span>" + item.label.replace("\n", "<br>") + "</span>";
       div.addEventListener("click", () => {
         [...stripEl.children].forEach((c) => c.classList.remove("active"));
@@ -790,10 +910,16 @@
 
     const h = scene.hotspots.find((x) => x.id === hotspotId);
     if (!h) return;
+
+    if (h.type === "menu") {
+      renderMenuPanel(scene, h);
+      return;
+    }
+
+    const photoKey = h.photo || scene.photo;
+    const creditKey = h.creditKey || scene.creditKey;
     infoPanel.innerHTML =
-      '<div class="photo" style="background:' + scene.gradient + '">' +
-        '<button class="close" id="infoClose">✕</button>' +
-      "</div>" +
+      photoBlock(photoKey, creditKey) +
       '<div class="body">' +
         '<div class="tag">' + h.tag + "</div>" +
         "<h3>" + h.title + "</h3>" +
@@ -817,11 +943,19 @@
     });
   }
 
+  function photoBlock(photoKey, creditKey) {
+    const credit = CREDITS[creditKey];
+    return (
+      '<div class="photo" style="background-image:url(\'' + photoKey + '\')">' +
+        '<button class="close" id="infoClose">✕</button>' +
+        (credit ? '<span class="credit">' + credit.author + " (" + credit.license + ")</span>" : "") +
+      "</div>"
+    );
+  }
+
   function renderRiadPanel(scene, hotspotId) {
     infoPanel.innerHTML =
-      '<div class="photo" style="background:' + scene.gradient + '">' +
-        '<button class="close" id="infoClose">✕</button>' +
-      "</div>" +
+      photoBlock(scene.photo, scene.creditKey) +
       '<div class="body">' +
         '<div class="tag">👑 Exclusive Collection</div>' +
         "<h3>Le Riad</h3>" +
@@ -837,7 +971,7 @@
       const card = document.createElement("div");
       card.className = "perso-card";
       card.innerHTML =
-        '<div class="thumb" style="background:' + scene.gradient + '"></div>' +
+        '<div class="thumb" style="background-image:url(\'' + p.photo + '\')"></div>' +
         '<div class="info"><b>' + p.title + "</b><span>" + p.desc + " — " + p.price + "</span></div>" +
         "<button>＋</button>";
       card.querySelector("button").addEventListener("click", (e) => {
@@ -853,6 +987,38 @@
       addToCart(hotspotId ? hotspotId.replace(/-/g, " ") : "Le Riad");
       showToast("Ajouté à votre séjour : Le Riad");
     });
+  }
+
+  function renderMenuPanel(scene, h) {
+    infoPanel.innerHTML =
+      photoBlock(scene.photo, scene.creditKey) +
+      '<div class="body">' +
+        '<div class="tag">' + h.tag + "</div>" +
+        "<h3>" + h.title + "</h3>" +
+        '<p class="menu-disclaimer">' + MENU.disclaimer + "</p>" +
+        MENU.categories.map((cat) =>
+          '<div class="menu-category"><h4>' + cat.name + "</h4>" +
+          cat.items.map((it) => '<div class="menu-item"><span>' + it[0] + '</span><span class="price">' + it[1] + "</span></div>").join("") +
+          "</div>"
+        ).join("") +
+        '<button class="primary" id="infoPrimary">Réserver une table</button>' +
+      "</div>";
+    infoPanel.classList.add("open");
+    document.getElementById("minimap").classList.add("dimmed");
+
+    document.getElementById("infoClose").addEventListener("click", closeInfoPanel);
+    document.getElementById("infoPrimary").addEventListener("click", () => {
+      addToCart("Table au " + h.title);
+      showToast("Réservation de table ajoutée à votre séjour (prototype)");
+    });
+  }
+
+  function buildCredits() {
+    const el = document.getElementById("credits");
+    const items = Object.values(CREDITS).map((c) =>
+      c.desc + " — " + c.author + ", <a href=\"" + c.url + "\" target=\"_blank\" rel=\"noopener\">Wikimedia Commons</a> (" + c.license + ")"
+    );
+    el.innerHTML = "<strong>Crédits photos :</strong> " + items.join(" · ");
   }
 
   function nextScene() {
@@ -881,6 +1047,7 @@
   buildScenes();
   buildMinimap();
   buildStrip();
+  buildCredits();
   switchScene("entree");
   updateCartUI();
 })();
