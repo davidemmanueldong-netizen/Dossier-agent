@@ -1,0 +1,296 @@
+<title>Coach Tactique</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700;800&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout : colonne unique type carnet de coach — diagnostic en haut, fiches stratégies dépliables, outils intégrés dans chaque fiche */
+:root{
+  --bg:#F2F4F7; --surface:#FFFFFF; --fg:#16202E; --muted:#5A6577; --line:#DCE1EA;
+  --accent:#2E56E0; --accent-soft:#E4EAFD; --good:#1F8A5B; --warm:#D9822B;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Source Sans 3",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0F151E; --surface:#18212D; --fg:#E8EDF5; --muted:#97A3B6; --line:#2A3544;
+  --accent:#7C9BFF; --accent-soft:#1F2B4A; --good:#4CC48D; --warm:#F0A55A; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151E; --surface:#18212D; --fg:#E8EDF5; --muted:#97A3B6; --line:#2A3544;
+  --accent:#7C9BFF; --accent-soft:#1F2B4A; --good:#4CC48D; --warm:#F0A55A; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:17px;line-height:1.55}
+.wrap{max-width:760px;margin:0 auto;padding-block:32px 64px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:28px}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;line-height:1.1}
+h1{font-size:clamp(2rem,6vw,3rem);font-weight:800;letter-spacing:-.02em}
+h2{font-size:1.35rem;font-weight:700}
+h3{font-size:1.15rem;font-weight:700}
+p{margin:0}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.lead{color:var(--muted);max-width:60ch}
+header{display:flex;flex-direction:column;gap:10px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:600 .95rem var(--body);border:1px solid var(--line);background:var(--surface);color:var(--fg);
+  padding:8px 14px;border-radius:999px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.chip:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.list{display:flex;flex-direction:column;gap:12px}
+details.card{background:var(--surface);border:1px solid var(--line);border-radius:14px}
+details.card[open]{border-color:var(--accent)}
+summary{list-style:none;cursor:pointer;padding:16px 18px;display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start}
+summary::-webkit-details-marker{display:none}
+summary .meta{grid-column:1/-1;font-size:.92rem;color:var(--muted)}
+summary .tag{font-family:var(--mono);font-size:.7rem;padding:3px 8px;border-radius:6px;background:var(--accent-soft);color:var(--accent);white-space:nowrap}
+.body{padding:0 18px 18px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.why{border-left:3px solid var(--accent);padding-left:12px;color:var(--muted);font-size:.95rem}
+ol.steps{margin:0;padding-left:1.3em;display:flex;flex-direction:column;gap:6px}
+.src{font-size:.82rem;color:var(--muted);font-family:var(--mono)}
+.tool{background:var(--bg);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px}
+label{font-weight:600;font-size:.92rem;display:flex;flex-direction:column;gap:4px}
+input[type=text],textarea{font:inherit;font-size:1rem;padding:9px 11px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);width:100%}
+textarea{min-height:64px;resize:vertical}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button.btn{font:600 .95rem var(--body);padding:9px 16px;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--surface);cursor:pointer}
+button.ghost{background:transparent;color:var(--accent)}
+.out{font-family:var(--display);font-size:1.1rem;font-weight:600;padding:12px;border-radius:8px;background:var(--accent-soft);color:var(--fg)}
+.out:empty{display:none}
+.timer{font-family:var(--mono);font-size:3rem;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.breath{width:120px;height:120px;border-radius:50%;background:var(--accent-soft);border:3px solid var(--accent);
+  display:grid;place-items:center;font-weight:600;transition:transform 1s ease-in-out;margin:8px auto}
+.matrix{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.q{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px;min-width:0}
+.q b{display:block;font-size:.85rem}
+.q small{color:var(--muted);display:block;margin-bottom:4px}
+.checkin .scale{display:flex;gap:6px;flex-wrap:wrap}
+.checkin .scale button{width:40px;height:40px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);font:600 1rem var(--mono);cursor:pointer}
+.checkin .scale button[aria-pressed="true"]{background:var(--accent);color:var(--surface);border-color:var(--accent)}
+.streak{display:flex;gap:4px;flex-wrap:wrap}
+.streak span{width:18px;height:18px;border-radius:4px;background:var(--line)}
+.streak span.on{background:var(--good)}
+.advice{padding:12px;border-radius:8px;border:1px dashed var(--warm)}
+.advice:empty{display:none}
+footer{color:var(--muted);font-size:.85rem}
+@media (prefers-reduced-motion:reduce){.breath{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Coach · stratégies validées par la recherche</span>
+    <h1>Coach Tactique</h1>
+    <p class="lead">Dis-moi ce qui te bloque. Je te donne la stratégie qui marche, les étapes exactes, et un outil pour l'appliquer tout de suite.</p>
+  </header>
+
+  <section class="panel checkin" aria-labelledby="ci-h">
+    <div class="row" style="justify-content:space-between">
+      <h2 id="ci-h">Check-in du jour</h2>
+      <span class="eyebrow" id="ci-date"></span>
+    </div>
+    <div>
+      <p style="font-weight:600;margin-bottom:6px">Ton énergie, de 1 à 5</p>
+      <div class="scale" id="energy" role="group" aria-label="Énergie"></div>
+    </div>
+    <label>La seule chose qui rendrait ta journée réussie
+      <input type="text" id="ci-one" placeholder="Ex. envoyer le devis à Martin avant 11 h">
+    </label>
+    <div class="advice" id="ci-advice"></div>
+    <div class="row" style="justify-content:space-between">
+      <button class="btn" id="ci-save">Valider mon check-in</button>
+      <div class="row"><span class="eyebrow">14 derniers jours</span><div class="streak" id="streak"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" aria-labelledby="diag-h">
+    <h2 id="diag-h">Qu'est-ce qui te bloque ?</h2>
+    <div class="chips" id="chips"></div>
+  </section>
+
+  <section class="list" id="list" aria-live="polite"></section>
+
+  <footer>Les stratégies citées viennent d'études publiées ou de méthodes reconnues. Ce coach ne remplace pas un professionnel de santé si le stress ou la fatigue durent.</footer>
+</div>
+
+<script>
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+const CATS=[["all","Tout voir"],["procra","Je procrastine"],["motiv","Je manque de motivation"],["habit","Je n'arrive pas à tenir une habitude"],["focus","Je n'arrive pas à me concentrer"],["prio","Trop de choses à faire"],["stress","Je suis stressé·e"],["conf","Je manque de confiance"]];
+
+const S=[
+ {id:"ifthen",cats:["procra","habit"],t:"Les intentions de mise en œuvre",tag:"Si… alors…",
+  meta:"Décider à l'avance quand, où et comment tu vas agir.",
+  why:"Une méta-analyse de 94 études montre un effet moyen à fort sur l'atteinte des objectifs. Le cerveau associe le déclencheur à l'action : tu n'as plus à décider sur le moment.",
+  steps:["Choisis une action précise et petite.","Choisis un déclencheur concret : une heure, un lieu, un événement.","Formule : « Si [déclencheur], alors je [action]. »","Ajoute un plan B pour l'obstacle le plus probable."],
+  src:"Gollwitzer & Sheeran (2006), Advances in Experimental Social Psychology",tool:"ifthen"},
+ {id:"woop",cats:["motiv","habit","procra"],t:"WOOP : le contraste mental",tag:"Wish · Outcome · Obstacle · Plan",
+  meta:"Visualiser le résultat ET l'obstacle intérieur, puis planifier.",
+  why:"Penser seulement au résultat positif réduit l'énergie pour agir. Confronter le rêve à l'obstacle réel augmente l'effort et l'engagement, selon 20 ans de recherches d'Oettingen.",
+  steps:["Wish : ton souhait, réaliste mais motivant.","Outcome : le meilleur résultat, imagine-le en détail.","Obstacle : ce qui, EN TOI, t'empêche d'y arriver.","Plan : « Si [obstacle], alors je [action]. »"],
+  src:"Oettingen (2014), Rethinking Positive Thinking",tool:"woop"},
+ {id:"two",cats:["procra","habit"],t:"La règle des 2 minutes",tag:"Démarrer petit",
+  meta:"Réduire n'importe quelle tâche à une version de 2 minutes.",
+  why:"Le plus dur est de commencer. Une fois lancé, l'effet Zeigarnik (une tâche entamée reste en tête) pousse à continuer. « Écrire le rapport » devient « ouvrir le doc et écrire le titre ».",
+  steps:["Prends la tâche que tu évites.","Écris sa version de 2 minutes, absurde de facilité.","Lance un minuteur de 2 minutes et fais-la maintenant.","À la fin, tu as le droit d'arrêter. En général, tu continues."],
+  src:"Allen, Getting Things Done (2001) · Clear, Atomic Habits (2018)",tool:"two"},
+ {id:"stack",cats:["habit"],t:"L'empilement d'habitudes",tag:"Tiny Habits",
+  meta:"Accrocher la nouvelle habitude à une routine qui existe déjà.",
+  why:"Les habitudes existantes sont des déclencheurs fiables. BJ Fogg (Stanford) montre qu'une habitude minuscule ancrée à une routine, suivie d'une petite célébration, s'installe plus vite que la volonté pure.",
+  steps:["Liste une routine que tu fais déjà chaque jour (café, brossage de dents).","Choisis une version minuscule de ta nouvelle habitude.","Formule : « Après [routine], je [mini-habitude]. »","Célèbre immédiatement (un « yes ! », un sourire) pour ancrer l'émotion.","Règle d'or : ne jamais rater deux jours d'affilée."],
+  src:"Fogg (2019), Tiny Habits",tool:"stack"},
+ {id:"pomo",cats:["focus","procra"],t:"La technique Pomodoro",tag:"25 / 5",
+  meta:"Travailler par blocs de 25 minutes avec une pause de 5.",
+  why:"Un temps limité rend la tâche moins intimidante et les pauses régulières limitent la fatigue mentale. Les distractions sont notées et reportées, pas suivies.",
+  steps:["Choisis UNE tâche.","Coupe les notifications, téléphone dans une autre pièce.","25 minutes de travail. Une idée parasite ? Note-la et reviens.","5 minutes de pause loin de l'écran.","Après 4 cycles, pause de 15 à 30 minutes."],
+  src:"Cirillo, The Pomodoro Technique (années 1980)",tool:"pomo"},
+ {id:"deep",cats:["focus","prio"],t:"Le time-blocking",tag:"Deep Work",
+  meta:"Donner à chaque heure de ta journée une mission.",
+  why:"Changer de tâche laisse un « résidu d'attention » qui baisse la performance (Leroy, 2009). Bloquer ton agenda protège les plages de travail profond.",
+  steps:["La veille, découpe ta journée en blocs de 30 à 90 minutes.","Mets ta tâche la plus importante dans ton pic d'énergie (souvent le matin).","Regroupe mails et messages dans 2 ou 3 blocs fixes.","Si un bloc déborde, redessine le reste de la journée au lieu d'abandonner le plan."],
+  src:"Newport (2016), Deep Work · Leroy (2009), OBHDP",tool:null},
+ {id:"eisen",cats:["prio","stress"],t:"La matrice d'Eisenhower",tag:"Urgent × Important",
+  meta:"Trier tes tâches en 4 cases pour savoir quoi faire, planifier, déléguer ou supprimer.",
+  why:"On surestime l'urgent au détriment de l'important (« mere urgency effect », Zhu et al., 2018). La matrice force à séparer les deux.",
+  steps:["Liste toutes tes tâches.","Urgent + important : fais-le aujourd'hui.","Important, pas urgent : planifie-le dans ton agenda.","Urgent, pas important : délègue ou expédie vite.","Ni l'un ni l'autre : supprime."],
+  src:"Zhu, Yang & Hsee (2018), Journal of Consumer Research",tool:"eisen"},
+ {id:"sigh",cats:["stress","conf"],t:"Le soupir physiologique",tag:"Calme en 1 minute",
+  meta:"Double inspiration par le nez, longue expiration par la bouche.",
+  why:"Une étude de Stanford (2023) a comparé plusieurs exercices : 5 minutes par jour de soupirs cycliques ont mieux amélioré l'humeur et réduit la fréquence respiratoire que la méditation de pleine conscience.",
+  steps:["Inspire par le nez.","Sans expirer, ajoute une petite inspiration pour remplir les poumons.","Expire lentement et longuement par la bouche.","Répète pendant 1 à 5 minutes."],
+  src:"Balban et al. (2023), Cell Reports Medicine",tool:"breath"},
+ {id:"reframe",cats:["stress","conf"],t:"Recadrer le stress en excitation",tag:"« Je suis excité·e »",
+  meta:"Avant une prise de parole ou un examen, dire « je suis excité·e » au lieu de « calme-toi ».",
+  why:"Stress et excitation ont la même signature physique. Essayer de se calmer échoue souvent. Les participants qui disaient « je suis excité·e » ont mieux chanté, mieux parlé en public et mieux réussi des tests de maths.",
+  steps:["Repère les signes : cœur qui bat, mains moites.","Dis à voix haute : « Je suis excité·e. »","Interprète ces sensations comme de l'énergie disponible.","Concentre-toi sur ce que tu peux gagner, pas sur ce que tu peux perdre."],
+  src:"Brooks (2014), Journal of Experimental Psychology: General",tool:null},
+ {id:"bundle",cats:["motiv","habit"],t:"Le couplage de tentations",tag:"Plaisir + effort",
+  meta:"N'autoriser un plaisir que pendant une tâche que tu repousses.",
+  why:"Dans l'étude de Milkman, les participants qui n'écoutaient leur livre audio favori qu'à la salle de sport y sont allés nettement plus souvent.",
+  steps:["Liste 3 plaisirs (série, podcast, playlist, café de luxe).","Liste 3 tâches que tu repousses.","Associe-les : « Je n'écoute [plaisir] que pendant [tâche]. »","Garde la règle stricte, sinon le plaisir perd son pouvoir."],
+  src:"Milkman, Minson & Volpp (2014), Management Science",tool:"bundle"},
+ {id:"fresh",cats:["motiv"],t:"L'effet nouveau départ",tag:"Fresh start",
+  meta:"Utiliser un repère temporel (lundi, début de mois, anniversaire) pour relancer un objectif.",
+  why:"Les repères temporels créent une coupure mentale avec « l'ancien moi » et ses échecs. Les recherches sur Google et les inscriptions en salle de sport augmentent après ces dates.",
+  steps:["Choisis le prochain repère proche : demain, lundi, le 1er du mois.","Nomme-le : « Le lundi 23, c'est le début de… »","Prépare une première action précise pour ce jour-là.","Si tu chutes, choisis le repère suivant au lieu de tout lâcher."],
+  src:"Dai, Milkman & Riis (2014), Management Science",tool:null},
+ {id:"forgive",cats:["procra","conf","motiv"],t:"L'auto-compassion après un raté",tag:"Repartir vite",
+  meta:"Te pardonner un écart au lieu de te punir.",
+  why:"Les étudiants qui s'étaient pardonné d'avoir procrastiné avant un examen ont moins procrastiné avant le suivant. La culpabilité alimente l'évitement.",
+  steps:["Constate le fait sans jugement : « J'ai repoussé ça. »","Rappelle-toi que c'est humain et que tout le monde le fait.","Parle-toi comme à un ami.","Choisis la prochaine petite action et fais-la."],
+  src:"Wohl, Pychyl & Bennett (2010), Personality and Individual Differences",tool:null},
+ {id:"wins",cats:["motiv","conf"],t:"Le principe du progrès",tag:"Journal des victoires",
+  meta:"Noter chaque soir les petits progrès de la journée.",
+  why:"Sur 12 000 entrées de journaux de travail, Teresa Amabile a montré que le facteur n°1 de motivation est le sentiment d'avancer, même sur de petites choses.",
+  steps:["Chaque soir, note 3 choses qui ont avancé, même minimes.","Note un obstacle rencontré et ce que tu en as appris.","Relis la semaine le vendredi.","Choisis la victoire de demain."],
+  src:"Amabile & Kramer (2011), The Progress Principle",tool:"wins"}
+];
+
+let current="all";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function chips(){
+  $("#chips").innerHTML=CATS.map(([k,l])=>`<button class="chip" data-k="${k}" aria-pressed="${k===current}">${l}</button>`).join("");
+}
+$("#chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;current=b.dataset.k;store.set("coach.cat",current);chips();render();});
+
+function toolHTML(s){
+  switch(s.tool){
+  case "ifthen":return `<div class="tool"><label>Si… (déclencheur)<input type="text" id="it-a" placeholder="il est 8 h 30 et je m'assois au bureau"></label>
+    <label>Alors je… (action)<input type="text" id="it-b" placeholder="ouvre le dossier client et écris 3 lignes"></label>
+    <div class="row"><button class="btn" data-act="ifthen">Créer mon plan</button></div><div class="out" id="it-out"></div></div>`;
+  case "woop":return `<div class="tool"><label>Wish : mon souhait<input type="text" id="w-w" placeholder="courir 3 fois par semaine"></label>
+    <label>Outcome : le meilleur résultat<input type="text" id="w-o" placeholder="me sentir en forme et fier·e"></label>
+    <label>Obstacle intérieur<input type="text" id="w-ob" placeholder="la flemme après le travail"></label>
+    <label>Plan : alors je…<input type="text" id="w-p" placeholder="mets mes baskets avant de m'asseoir"></label>
+    <div class="row"><button class="btn" data-act="woop">Générer mon WOOP</button></div><div class="out" id="w-out"></div></div>`;
+  case "two":return `<div class="tool"><label>La tâche que j'évite<input type="text" id="tw-a" placeholder="faire ma déclaration"></label>
+    <label>Sa version de 2 minutes<input type="text" id="tw-b" placeholder="ouvrir le site des impôts et me connecter"></label>
+    <div class="row"><button class="btn" data-act="two">Lancer 2 minutes</button><span class="timer" id="tw-t" style="font-size:1.6rem">2:00</span></div></div>`;
+  case "stack":return `<div class="tool"><label>Après…(routine existante)<input type="text" id="st-a" placeholder="m'être servi mon café"></label>
+    <label>Je…(mini-habitude)<input type="text" id="st-b" placeholder="fais 5 pompes"></label>
+    <div class="row"><button class="btn" data-act="stack">Créer ma formule</button></div><div class="out" id="st-out"></div></div>`;
+  case "pomo":return `<div class="tool"><span class="eyebrow" id="p-mode">Travail · cycle 1</span><span class="timer" id="p-t">25:00</span>
+    <div class="row"><button class="btn" data-act="pstart" id="p-btn">Démarrer</button><button class="btn ghost" data-act="preset">Réinitialiser</button></div></div>`;
+  case "breath":return `<div class="tool"><div class="breath" id="br">Prêt·e</div>
+    <div class="row" style="justify-content:center"><button class="btn" data-act="breath" id="br-btn">Lancer 1 minute</button></div></div>`;
+  case "eisen":return `<div class="tool"><label>Une tâche<input type="text" id="ei-in" placeholder="répondre au mail de la banque"></label>
+    <div class="row"><button class="btn ghost" data-q="0">Urgent + important</button><button class="btn ghost" data-q="1">Important</button><button class="btn ghost" data-q="2">Urgent</button><button class="btn ghost" data-q="3">Aucun</button></div>
+    <div class="matrix" id="ei-m"></div></div>`;
+  case "bundle":return `<div class="tool"><label>Mon plaisir<input type="text" id="bu-a" placeholder="mon podcast préféré"></label>
+    <label>La tâche que je repousse<input type="text" id="bu-b" placeholder="le ménage"></label>
+    <div class="row"><button class="btn" data-act="bundle">Créer ma règle</button></div><div class="out" id="bu-out"></div></div>`;
+  case "wins":return `<div class="tool"><label>Mes 3 progrès du jour<textarea id="wi-in" placeholder="J'ai fini la slide 4&#10;J'ai appelé le client&#10;J'ai marché 20 min"></textarea></label>
+    <div class="row"><button class="btn" data-act="wins">Enregistrer</button><span class="src" id="wi-c"></span></div></div>`;
+  default:return "";}
+}
+
+function render(){
+  const items=S.filter(s=>current==="all"||s.cats.includes(current));
+  $("#list").innerHTML=items.map((s,i)=>`<details class="card" data-id="${s.id}" ${i===0&&current!=="all"?"open":""}>
+    <summary><h3>${s.t}</h3><span class="tag">${s.tag}</span><span class="meta">${s.meta}</span></summary>
+    <div class="body"><p class="why">${s.why}</p><ol class="steps">${s.steps.map(x=>`<li>${x}</li>`).join("")}</ol>
+    ${toolHTML(s)}<p class="src">Source : ${s.src}</p></div></details>`).join("");
+  if(document.getElementById("ei-m"))drawMatrix();
+  const w=store.get("coach.wins",[]);if(document.getElementById("wi-c"))$("#wi-c").textContent=w.length?`${w.length} journée(s) enregistrée(s)`:"";
+  if(document.getElementById("p-t"))drawPomo();
+}
+
+/* Outils */
+const val=id=>($("#"+id)?.value||"").trim();
+const say=(id,t)=>{$("#"+id).textContent=t};
+let timers={};
+function countdown(key,secs,onTick,onEnd){clearInterval(timers[key]);let r=secs;onTick(r);
+  timers[key]=setInterval(()=>{r--;onTick(r);if(r<=0){clearInterval(timers[key]);onEnd&&onEnd();}},1000);}
+const fmt=s=>`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;
+
+let pomo={left:1500,work:true,cycle:1,run:false};
+function drawPomo(){const t=$("#p-t");if(!t)return;t.textContent=fmt(pomo.left);
+  $("#p-mode").textContent=(pomo.work?"Travail":"Pause")+" · cycle "+pomo.cycle;$("#p-btn").textContent=pomo.run?"Pause":"Démarrer";}
+function pomoTick(){pomo.left--;if(pomo.left<=0){if(pomo.work){pomo.work=false;pomo.left=pomo.cycle%4===0?900:300;}else{pomo.work=true;pomo.cycle++;pomo.left=1500;}}drawPomo();}
+
+const quads=["Fais-le aujourd'hui","Planifie-le","Délègue-le","Supprime-le"];
+const qNames=["Urgent + important","Important, pas urgent","Urgent, pas important","Ni l'un ni l'autre"];
+function drawMatrix(){const m=store.get("coach.eisen",[[],[],[],[]]);
+  $("#ei-m").innerHTML=m.map((l,i)=>`<div class="q"><b>${qNames[i]}</b><small>${quads[i]}</small>${l.map(x=>`<div>• ${esc(x)}</div>`).join("")||"<small>—</small>"}</div>`).join("");}
+
+document.addEventListener("click",e=>{
+  const q=e.target.closest("[data-q]");
+  if(q){const t=val("ei-in");if(!t)return;const m=store.get("coach.eisen",[[],[],[],[]]);m[+q.dataset.q].push(t);store.set("coach.eisen",m);$("#ei-in").value="";drawMatrix();return;}
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const a=b.dataset.act;
+  if(a==="ifthen")say("it-out",val("it-a")&&val("it-b")?`Si ${val("it-a")}, alors je ${val("it-b")}.`:"Remplis les deux champs.");
+  if(a==="woop")say("w-out",val("w-w")&&val("w-ob")&&val("w-p")?`Je veux ${val("w-w")}${val("w-o")?", pour "+val("w-o"):""}. Si ${val("w-ob")} se présente, alors je ${val("w-p")}.`:"Remplis au moins le souhait, l'obstacle et le plan.");
+  if(a==="stack")say("st-out",val("st-a")&&val("st-b")?`Après ${val("st-a")}, je ${val("st-b")}. Puis je célèbre.`:"Remplis les deux champs.");
+  if(a==="bundle")say("bu-out",val("bu-a")&&val("bu-b")?`Je n'écoute/profite de « ${val("bu-a")} » que pendant ${val("bu-b")}.`:"Remplis les deux champs.");
+  if(a==="two")countdown("two",120,r=>{const t=$("#tw-t");if(t)t.textContent=fmt(r)},()=>{const t=$("#tw-t");if(t)t.textContent="Bravo ! Tu continues ?"});
+  if(a==="pstart"){pomo.run=!pomo.run;clearInterval(timers.pomo);if(pomo.run)timers.pomo=setInterval(pomoTick,1000);drawPomo();}
+  if(a==="preset"){clearInterval(timers.pomo);pomo={left:1500,work:true,cycle:1,run:false};drawPomo();}
+  if(a==="breath"){const el=$("#br");let t=0;clearInterval(timers.br);
+    const seq=[["Inspire",1.25,2],["Encore un peu",1.4,1],["Expire lentement",.8,5]];let phase=0,ph=0;
+    const step=()=>{const [txt,sc,d]=seq[phase];el.textContent=txt;el.style.transform=`scale(${sc})`;ph++;if(ph>=d){ph=0;phase=(phase+1)%3;}t++;if(t>60){clearInterval(timers.br);el.textContent="Terminé";el.style.transform="scale(1)";}};
+    step();timers.br=setInterval(step,1000);}
+  if(a==="wins"){const t=val("wi-in");if(!t)return;const w=store.get("coach.wins",[]);w.push({d:new Date().toISOString().slice(0,10),t});store.set("coach.wins",w);$("#wi-in").value="";$("#wi-c").textContent=`Enregistré. ${w.length} journée(s) au total.`;}
+});
+
+/* Check-in */
+const today=new Date().toISOString().slice(0,10);
+$("#ci-date").textContent=new Date().toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"});
+let energy=null;
+const ci=store.get("coach.checkins",{});
+if(ci[today]){energy=ci[today].e;$("#ci-one").value=ci[today].one||"";}
+function drawEnergy(){$("#energy").innerHTML=[1,2,3,4,5].map(n=>`<button data-e="${n}" aria-pressed="${n===energy}">${n}</button>`).join("");}
+const ADV={1:"Énergie très basse : fais seulement la version de 2 minutes de ta priorité, puis 1 minute de soupir physiologique. Repose-toi sans culpabilité.",
+ 2:"Énergie basse : un seul Pomodoro sur ta priorité, le reste peut attendre. Bois de l'eau et prends l'air 10 minutes.",
+ 3:"Énergie moyenne : bloque 2 Pomodoros sur ta priorité avant midi, et regroupe tes messages dans un seul créneau.",
+ 4:"Bonne énergie : attaque ta tâche la plus difficile maintenant, en bloc de 90 minutes sans notifications.",
+ 5:"Énergie au top : fais ta priorité, puis avance sur un objectif important mais pas urgent (case 2 d'Eisenhower)."};
+function drawAdvice(){$("#ci-advice").textContent=energy?ADV[energy]:"";}
+$("#energy").addEventListener("click",e=>{const b=e.target.closest("[data-e]");if(!b)return;energy=+b.dataset.e;drawEnergy();drawAdvice();});
+function drawStreak(){const c=store.get("coach.checkins",{});let h="";for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const k=d.toISOString().slice(0,10);h+=`<span class="${c[k]?"on":""}" title="${k}"></span>`;}$("#streak").innerHTML=h;}
+$("#ci-save").addEventListener("click",()=>{if(!energy){$("#ci-advice").textContent="Choisis d'abord ton niveau d'énergie.";return;}
+  const c=store.get("coach.checkins",{});c[today]={e:energy,one:val("ci-one")};store.set("coach.checkins",c);drawStreak();
+  $("#ci-save").textContent="Check-in enregistré";setTimeout(()=>$("#ci-save").textContent="Valider mon check-in",2000);});
+
+current=store.get("coach.cat","all");
+drawEnergy();drawAdvice();drawStreak();chips();render();
+</script>
